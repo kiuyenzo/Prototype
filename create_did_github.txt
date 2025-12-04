@@ -2,6 +2,8 @@ https://kiuyenzo.github.io/did/issuer/did.json
 https://kiuyenzo.github.io/did/nf-a/did.json
 https://kiuyenzo.github.io/did/nf-b/did.json
 
+https://kiuyenzo.github.io/Prototype/cluster-a/did/nf-a
+
 veramo did resolve did:web:kiuyenzo.github.io:did:issuer
 veramo did resolve did:web:kiuyenzo.github.io:did:nf-a
 veramo did resolve did:web:kiuyenzo.github.io:did:nf-b
