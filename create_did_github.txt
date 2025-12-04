@@ -37,9 +37,8 @@ git commit -m "Add did:web:kiuyenzo.github.io:did:issuer"
 git push
 
 #testen
-veramo did resolve did:web:kiuyenzo.github.io:did:issuer
-veramo did resolve did:web:kiuyenzo.github.io:did:nf-a
-veramo did resolve did:web:kiuyenzo.github.io:did:nf-b
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did:issuer
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did:nf-a
 
 veramo did add-service
 # für jede did
