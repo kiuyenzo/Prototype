@@ -1,0 +1,21 @@
+# Cluster B - VirtualService für DIDComm Traffic
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: nf-b-didcomm-vs
+  namespace: nf-b-namespace
+spec:
+  hosts:
+  - "didcomm.nf-b.cluster-b.global"
+  gateways:
+  - nf-b-didcomm-gateway
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - "didcomm.nf-b.cluster-b.global"
+    route:
+    - destination:
+        host: veramo-nf-b.nf-b-namespace.svc.cluster.local
+        port:
+          number: 7001

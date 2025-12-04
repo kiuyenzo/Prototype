@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: veramo-config
+  namespace: nf-a-namespace
+data:
+  DIDCOMM_PACKING_MODE: "encrypted"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-a
+  namespace: nf-a-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nf-a
+  template:
+    metadata:
+      labels:
+        app: nf-a
+    spec:
+      containers:
+        # OLD: Placeholder NF_A app container
+        # - name: nf-a-app
+        #   image: nginx:1.27-alpine
+        #   ports:
+        #     - containerPort: 8080
+        #   command: ["sh", "-c", "nginx -g 'daemon off;'"]
+        #   env:
+        #     - name: VERAMO_AGENT_URL
+        #       value: "http://localhost:7001"
+        #     - name: DIDCOMM_PACKING_MODE
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: veramo-config
+        #           key: DIDCOMM_PACKING_MODE
+
+        # OLD: Placeholder Veramo container
+        # - name: veramo-nf-a
+        #   image: curlimages/curl:8.11.1
+        #   command: ["sh", "-c", "echo 'fake veramo nf-a running'; sleep 3650d"]
+        #   ports:
+        #     - containerPort: 7001
+        #   env:
+        #     - name: DIDCOMM_PACKING_MODE
+        #       valueFrom:
+        #         configMapKeyRef:
+        #           name: veramo-config
+        #           key: DIDCOMM_PACKING_MODE
+        #     - name: DID_WEB
+        #       value: "did:web:nf-a.example.com"
+
+        # NEW: Real Veramo NF_A Agent
+        - name: veramo-nf-a
+          image: veramo-nf-a:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 7001
+              name: http
+          env:
+            - name: PORT
+              value: "7001"
+            - name: BASE_URL
+              value: "https://didcomm.nf-a.cluster-a.global"
+            - name: DID_WEB
+              value: "did:web:nf-a.example.com"
+            - name: DB_PATH
+              value: "/data/nf-a-database.sqlite"
+            - name: DB_ENCRYPTION_KEY
+              value: "6836c716a0fa7c9fb4e9f02c087eb2f99b1e6579362ed5fd453b0a00039c2840"
+            - name: DIDCOMM_PACKING_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: veramo-config
+                  key: DIDCOMM_PACKING_MODE
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 7001
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 7001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veramo-nf-a
+  namespace: nf-a-namespace
+spec:
+  selector:
+    app: nf-a
+  ports:
+    - name: http-veramo
+      port: 7001
+      targetPort: 7001
+
+

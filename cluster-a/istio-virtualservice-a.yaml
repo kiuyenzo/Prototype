@@ -1,0 +1,58 @@
+# VirtualService - Eingehender Traffic (Ingress)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: nf-a-ingress-vs
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - "nf-a.local"
+  - "nf-a.cluster-a.global"
+  gateways:
+  - nf-a-ingress-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/veramo"
+    route:
+    - destination:
+        host: veramo-nf-a
+        port:
+          number: 7001
+  - route:
+    - destination:
+        host: nf-a-service
+        port:
+          number: 8080
+---
+# VirtualService - Ausgehender Traffic zu Cluster B (Egress)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: nf-a-to-nf-b-egress
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - "nf-b.cluster-b.global"
+  gateways:
+  - mesh
+  - nf-a-egress-gateway
+  http:
+  - match:
+    - gateways:
+      - mesh
+      port: 80
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        port:
+          number: 80
+  - match:
+    - gateways:
+      - nf-a-egress-gateway
+      port: 80
+    route:
+    - destination:
+        host: nf-b.cluster-b.global
+        port:
+          number: 80

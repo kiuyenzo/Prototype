@@ -1,0 +1,11 @@
+# Cluster A - DestinationRule für Veramo Service
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: veramo-nf-a-didcomm-dr
+  namespace: nf-a-namespace
+spec:
+  host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL  # mTLS zwischen Sidecar und Service

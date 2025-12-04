@@ -1,0 +1,19 @@
+# ServiceEntry - Cluster A kann Cluster B erreichen
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: nf-b-external
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - nf-b.cluster-b.global
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+  - address: 172.23.0.3  # Cluster B IP
+    ports:
+      http: 30296  # Cluster B NodePort

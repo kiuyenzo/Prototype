@@ -1,0 +1,250 @@
+## optional
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: veramo-config
+  namespace: nf-b-namespace
+data:
+  DIDCOMM_PACKING_MODE: "encrypted"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: veramo-agent-config
+  namespace: nf-b-namespace
+data:
+  agent.yml: |
+    version: 3.0
+
+    constants:
+      baseUrl: http://localhost:3336
+      port: 7002
+      dbEncryptionKey: 5f515673f0c724db7b01597df738f8a4e800153507001cf1a8f116fa9af7c6cb
+      databaseFile: /data/database-nf-b.sqlite
+      methods:
+        - keyManagerCreate
+        - keyManagerGet
+        - didManagerCreate
+        - didManagerGet
+        - didManagerFind
+        - resolveDid
+        - handleMessage
+        - packDIDCommMessage
+        - unpackDIDCommMessage
+        - sendDIDCommMessage
+        - createVerifiableCredential
+        - verifyCredential
+
+    dbConnection:
+      $require: typeorm#DataSource
+      $args:
+        - type: sqlite
+          database:
+            $ref: /constants/databaseFile
+          synchronize: false
+          migrationsRun: true
+          migrations:
+            $require: '@veramo/data-store?t=object#migrations'
+          logging: false
+          entities:
+            $require: '@veramo/data-store?t=object#Entities'
+
+    server:
+      baseUrl:
+        $ref: /constants/baseUrl
+      port:
+        $ref: /constants/port
+      use:
+        - - $require: 'cors?t=function#default'
+        - - $require: '@veramo/remote-server?t=function#RequestWithAgentRouter'
+            $args:
+              - agent:
+                  $ref: /agent
+        - - $require: '@veramo/remote-server?t=function#WebDidDocRouter'
+        - - /didcomm
+          - $require: '@veramo/remote-server?t=function#MessagingRouter'
+            $args:
+              - metaData:
+                  type: DIDComm
+                  value: https
+        - - /agent
+          - $require: '@veramo/remote-server?t=function#AgentRouter'
+            $args:
+              - exposedMethods:
+                  $ref: /constants/methods
+      init:
+        - $require: '@veramo/remote-server?t=function#createDefaultDid'
+          $args:
+            - agent:
+                $ref: /agent
+              baseUrl:
+                $ref: /constants/baseUrl
+              messagingServiceEndpoint: /didcomm
+
+    messageHandler:
+      $require: '@veramo/message-handler#MessageHandler'
+      $args:
+        - messageHandlers:
+            - $require: '@veramo/did-comm#DIDCommMessageHandler'
+            - $require: '@veramo/did-jwt#JwtMessageHandler'
+            - $require: '@veramo/credential-w3c#W3cMessageHandler'
+
+    didResolver:
+      $require: '@veramo/did-resolver#DIDResolverPlugin'
+      $args:
+        - web:
+            $require: web-did-resolver?t=function&p=/web#getResolver
+          key:
+            $require: '@veramo/did-provider-key?t=function&p=/key#getDidKeyResolver'
+          peer:
+            $require: '@veramo/did-provider-peer?t=function&p=/peer#getResolver'
+
+    keyManager:
+      $require: '@veramo/key-manager#KeyManager'
+      $args:
+        - store:
+            $require: '@veramo/data-store#KeyStore'
+            $args:
+              - $ref: /dbConnection
+          kms:
+            local:
+              $require: '@veramo/kms-local#KeyManagementSystem'
+              $args:
+                - $require: '@veramo/data-store#PrivateKeyStore'
+                  $args:
+                    - $ref: /dbConnection
+                    - $require: '@veramo/kms-local#SecretBox'
+                      $args:
+                        - $ref: /constants/dbEncryptionKey
+
+    didManager:
+      $require: '@veramo/did-manager#DIDManager'
+      $args:
+        - store:
+            $require: '@veramo/data-store#DIDStore'
+            $args:
+              - $ref: /dbConnection
+          defaultProvider: did:web
+          providers:
+            did:web:
+              $require: '@veramo/did-provider-web#WebDIDProvider'
+              $args:
+                - defaultKms: local
+            did:key:
+              $require: '@veramo/did-provider-key#KeyDIDProvider'
+              $args:
+                - defaultKms: local
+            did:peer:
+              $require: '@veramo/did-provider-peer#PeerDIDProvider'
+              $args:
+                - defaultKms: local
+
+    agent:
+      $require: '@veramo/core#Agent'
+      $args:
+        - schemaValidation: false
+          plugins:
+            - $ref: /keyManager
+            - $ref: /didManager
+            - $ref: /didResolver
+            - $ref: /messageHandler
+            - $require: '@veramo/did-comm#DIDComm'
+            - $require: '@veramo/credential-w3c#CredentialPlugin'
+            - $require: '@veramo/data-store#DataStore'
+              $args:
+                - $ref: /dbConnection
+            - $require: '@veramo/data-store#DataStoreORM'
+              $args:
+                - $ref: /dbConnection
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: veramo-data-nf-b
+  namespace: nf-b-namespace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-b
+  namespace: nf-b-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nf-b
+  template:
+    metadata:
+      labels:
+        app: nf-b
+    spec:
+      volumes:
+        - name: veramo-config-volume
+          configMap:
+            name: veramo-agent-config
+        - name: veramo-data
+          persistentVolumeClaim:
+            claimName: veramo-data-nf-b
+      containers:
+        - name: nf-b-app
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 8080
+          command: ["sh", "-c", "nginx -g 'daemon off;'"]
+          env:
+            - name: VERAMO_AGENT_URL
+              value: "http://localhost:7002"
+            - name: DIDCOMM_PACKING_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: veramo-config
+                  key: DIDCOMM_PACKING_MODE
+
+        - name: veramo-nf-b
+          image: veramolabs/veramo-agent:latest
+          ports:
+            - containerPort: 7002
+              name: http
+          volumeMounts:
+            - name: veramo-config-volume
+              mountPath: /app/agent.yml
+              subPath: agent.yml
+            - name: veramo-data
+              mountPath: /data
+          env:
+            - name: DIDCOMM_PACKING_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: veramo-config
+                  key: DIDCOMM_PACKING_MODE
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 7002
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 7002
+            initialDelaySeconds: 10
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veramo-nf-b
+  namespace: nf-b-namespace
+spec:
+  selector:
+    app: nf-b
+  ports:
+    - name: http-veramo
+      port: 7002
+      targetPort: 7002

@@ -1,0 +1,21 @@
+# Cluster A - VirtualService für DIDComm Traffic
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: nf-a-didcomm-vs
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - "didcomm.nf-a.cluster-a.global"
+  gateways:
+  - nf-a-didcomm-gateway
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - "didcomm.nf-a.cluster-a.global"
+    route:
+    - destination:
+        host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+        port:
+          number: 7001

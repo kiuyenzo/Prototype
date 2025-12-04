@@ -1,0 +1,55 @@
+{
+  "name": "@veramo/did-discovery",
+  "description": "Veramo DID discovery plugin",
+  "version": "6.0.0",
+  "main": "build/index.js",
+  "exports": {
+    ".": "./build/index.js"
+  },
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "generate-plugin-schema": "node ../cli/bin/veramo.js dev generate-plugin-schema"
+  },
+  "veramo": {
+    "pluginInterfaces": {
+      "IDIDDiscovery": "./src/types.ts"
+    }
+  },
+  "dependencies": {
+    "@veramo/core-types": "workspace:^",
+    "debug": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/debug": "4.1.8",
+    "typescript": "5.7.3"
+  },
+  "files": [
+    "build/**/*",
+    "src/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/decentralized-identity/veramo.git",
+    "directory": "packages/did-discovery"
+  },
+  "author": "Consensys Mesh R&D <hello@veramo.io>",
+  "contributors": [
+    "Simonas Karuzas <simonas.karuzas@mesh.xyz>",
+    "Mircea Nistor <mircea.nistor@mesh.xyz>",
+    "Oliver Terbu"
+  ],
+  "keywords": [
+    "Veramo",
+    "DID",
+    "Verifiable Credential",
+    "veramo-plugin"
+  ],
+  "license": "Apache-2.0",
+  "type": "module"
+}

@@ -1,0 +1,19 @@
+# ServiceEntry - Cluster B kann Cluster A über HTTPS erreichen
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: nf-a-didcomm-external
+  namespace: nf-b-namespace
+spec:
+  hosts:
+  - didcomm.nf-a.cluster-a.global
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+  - address: 172.23.0.2  # Cluster A IP
+    ports:
+      https: 30217  # ← Cluster A HTTPS NodePort
