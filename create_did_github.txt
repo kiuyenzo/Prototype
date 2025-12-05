@@ -23,6 +23,7 @@ veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 veramo did create
 kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a
 kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
+did:web:kiuyenzo.github.io:Prototype:cluster-a
 
 veramo server
 
