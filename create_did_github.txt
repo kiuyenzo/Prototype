@@ -18,17 +18,27 @@ https://kiuyenzo.github.io/Prototype/cluster-a/did/issuer-a/did.json
 veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a
 veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-b:did-issuer-b
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
+
 ## testen auf drei ebene wenn nicht dann zwei
 
 veramo did create
 kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a
 kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 
+kiuyenzo.github.io:Prototype:cluster-b:did-issuer-b
+kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
+
 
 veramo server agent.yml in cluster-a starten lassen
 
 curl -o did-issuer-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-issuer-a/did.json # klappt
 curl -o did-nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-nf-a/did.json # klappt
+
+
+curl -o did-issuer-b/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/Prototype/cluster-b/did-issuer-b/did.json # klappt
+curl -o did-nf-b/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/Prototype/cluster-b/did-nf-b/did.json # klappt
 
 #lieber mit comit
 git add issuer/did.json
@@ -39,13 +49,20 @@ git push
 veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a
 veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-b:did-issuer-b
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
+
 veramo did add-service
 # für jede did
-endpoint: http://localhost:3332/messaging
+endpoint: http://localhost:3332/messaging, http://localhost:3331/messaging
 id: #messaging-local
 
 curl -o did-issuer-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-issuer-a/did.json # klappt
 curl -o did-nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-nf-a/did.json # klappt
+
+curl -o did-issuer-b/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/Prototype/cluster-b/did-issuer-b/did.json # klappt
+curl -o did-nf-b/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/Prototype/cluster-b/did-nf-b/did.json # klappt
+
 
 
 #lieber mit comit
@@ -56,6 +73,8 @@ git push
 veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a
 veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-b:did-issuer-b
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
 
 #Es ist ein Message Handler System in Veramo für DIDComm und Verifiable Credentials Austausch.
 
