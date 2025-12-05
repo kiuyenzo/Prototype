@@ -30,7 +30,12 @@ veramo server
 curl -o did.json -H "Host: <your github user>.github.io" http://localhost:3332/alice/did.json
 curl -o nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/did/nf-a/did.json #klappt
 
-curl -o did-issuer-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototpye/cluster-a/did-issuer-a/did.json 
+curl -o cluster-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did.json 
+
+
+curl -o did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did.json
+
+curl -o did-issuer-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-issuer-a/did.json 
 
 
 curl -o test/did.json \
