@@ -41,14 +41,11 @@ veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 
 veramo did add-service
 # für jede did
-endpoint: http://localhost:3331/messaging
+endpoint: http://localhost:3332/messaging
 id: #messaging-local
 
-
-curl -o issuer/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/did/issuer/did.json
-curl -o nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/did/nf-a/did.json
-curl -o nf-b/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/did/nf-b/did.json
-
+curl -o did-issuer-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-issuer-a/did.json # klappt
+curl -o did-nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-nf-a/did.json # klappt
 
 
 #lieber mit comit
