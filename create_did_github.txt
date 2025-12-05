@@ -15,8 +15,8 @@ https://kiuyenzo.github.io/Prototype/cluster-a/did/issuer-a/did.json
 "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did:issuer-a"
 "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did:nf-a"
 
-veramo did resolve did:web:kiuyenzo.github.io:Prototype:did:issuer
-veramo did resolve did:web:kiuyenzo.github.io:Prototype:did:nf-a
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 
 ## testen auf drei ebene wenn nicht dann zwei
 
