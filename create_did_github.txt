@@ -15,14 +15,14 @@ https://kiuyenzo.github.io/Prototype/cluster-a/did/issuer-a/did.json
 "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did:issuer-a"
 "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did:nf-a"
 
-veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did:issuer-a
-veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did:nf-a
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:did:issuer
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:did:nf-a
 
 ## testen auf drei ebene wenn nicht dann zwei
 
 veramo did create
-kiuyenzo.github.io:Prototype:cluster-a:did:issuer-a
-kiuyenzo.github.io:Prototype:cluster-a:did:nf-a
+kiuyenzo.github.io:Prototype:did:issuer
+kiuyenzo.github.io:Prototype:did:nf-a
 
 veramo server
 
@@ -37,9 +37,11 @@ curl -o cluster-a/did/issuer-a/test/did.json \
   -H "Host: kiuyenzo.github.io" \
   http://localhost:3332/Prototype/cluster-a/did/issuer-a/did.json
 
-  curl -o issuer/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/did/issuer/did.json
+curl -o issuer/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/did/issuer/did.json
 
 curl -o nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/did/nf-a/did.json #klappt
+
+curl -o /did/nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/did/nf-a/did.json 
 
 # Diese curl-Befehle funktionieren nicht, weil WebDidDocRouter keine Sub-Paths unterstützt
 # Stattdessen manuell exportieren:
