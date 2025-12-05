@@ -53,9 +53,8 @@ git add issuer/did.json
 git commit -m "Add service endpoint"
 git push
 
-veramo did resolve did:web:kiuyenzo.github.io:did:issuer
-veramo did resolve did:web:kiuyenzo.github.io:did:nf-a
-veramo did resolve did:web:kiuyenzo.github.io:did:nf-b
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
 
 
 #Es ist ein Message Handler System in Veramo für DIDComm und Verifiable Credentials Austausch.
