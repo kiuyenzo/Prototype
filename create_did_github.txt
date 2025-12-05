@@ -32,10 +32,11 @@ curl -o nf-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3331/did/nf
 
 curl -o cluster-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did.json 
 
+curl -o did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did.json
 
 curl -o did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did.json
 
-curl -o did-issuer-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-issuer-a/did.json 
+curl -o did-issuer-a/did.json -H "Host: kiuyenzo.github.io" http://localhost:3332/Prototype/cluster-a/did-issuer-a/did.json # klappt
 
 
 curl -o test/did.json \
