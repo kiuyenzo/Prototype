@@ -17,4 +17,4 @@ spec:
     to:
     - operation:
         methods: ["POST", "GET"]
-        paths: ["/didcomm*", "/veramo*"]
+        paths: ["/messaging*", "/didcomm*", "/veramo*"]

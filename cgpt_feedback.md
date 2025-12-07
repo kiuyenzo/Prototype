@@ -160,6 +160,10 @@ Wenn du willst, kann ich dir im nächsten Schritt:
 * inkl. Beschreibung der drei Phasen aus deinem Sequenzdiagramm, aber direkt auf deine YAML-Ressourcen gemappt.
 
 
+-----
+
+
+https://chatgpt.com/c/693307d3-9474-8332-94fc-c69e672feb06
 
 - deployment in beiden clustern neu starten
 - pods überprüfen
@@ -195,9 +199,78 @@ Endpoints:
 🔍 OpenAPI: http://localhost:7001/open-api.json
 
 
-zähle mir die ganzen kommandos auf die du genutzt hast: todo
+zähle mir die ganzen kommandos auf die du genutzt hast: 
+1. Ports in agent.yml anpassen
+# Manuelle Bearbeitung der Dateien:
+# cluster-a/agent.yml: Port 3332 → 7001
+# cluster-a/agent.yml: basePath :3332/agent → :7001/agent
+2. Docker Image bauen
+# agent.yml kopieren und Image bauen
+cp cluster-a/agent.yml agent.yml && docker build -t veramo-nf-a:latest . && rm -f agent.yml
+3. Image in Cluster laden
+# Image in Kind Cluster-A laden
+kind load docker-image veramo-nf-a:latest --name cluster-a
+4. Health Check Pfad anpassen
+# Manuelle Bearbeitung:
+# cluster-a/nf-a.yaml: /health → /open-api.json (für liveness und readiness probe)
+5. Deployment anwenden und Pod neu starten
+# Kontext auf Cluster-A wechseln
+kubectl config use-context kind-cluster-a
+
+# Aktualisierte Konfiguration anwenden
+kubectl apply -f cluster-a/nf-a.yaml
+
+# Alten Pod löschen (neuer wird automatisch erstellt)
+kubectl delete pod -n nf-a-namespace <POD-NAME>
+6. Status prüfen
+# Pods anzeigen
+kubectl get pods -n nf-a-namespace
+
+# Logs vom Veramo Container prüfen
+kubectl logs -n nf-a-namespace <POD-NAME> -c veramo-nf-a --tail=20
+
+# Pod Details anzeigen
+kubectl describe pod -n nf-a-namespace <POD-NAME>
+Zusammenfassung in korrekter Reihenfolge:
+# 1. Image bauen
+cp cluster-a/agent.yml agent.yml && docker build -t veramo-nf-a:latest . && rm -f agent.yml
+
+# 2. Image in Cluster laden
+kind load docker-image veramo-nf-a:latest --name cluster-a
+
+# 3. Deployment anwenden
+kubectl config use-context kind-cluster-a
+kubectl apply -f cluster-a/nf-a.yaml
+
+# 4. Status prüfen
+kubectl get pods -n nf-a-namespace
+kubectl logs -n nf-a-namespace <POD-NAME> -c veramo-nf-a
+
+clust b done
+container 3/3 überprüfen: kubectl get pod nf-b-856fd58967-mlts4 -n nf-b-namespace -o jsonpath='{.spec.containers[*].name}'
 
 
+Um zwischen Clustern zu wechseln:
+Cluster-B pausieren, Cluster-A aktivieren:
+kubectl config use-context kind-cluster-b
+kubectl scale deployment nf-b -n nf-b-namespace --replicas=0
 
-cluster b testentodo
+kubectl config use-context kind-cluster-a
+kubectl scale deployment nf-a -n nf-a-namespace --replicas=1
+Oder beide gleichzeitig laufen lassen (wenn genug RAM verfügbar):
+kubectl config use-context kind-cluster-a
+kubectl scale deployment nf-a -n nf-a-namespace --replicas=1
 
+# Was geändert wurde:
+Beide Cluster (A & B):
+Datei: istio-authz-policy-didcomm.yaml Vorher:
+paths: ["/didcomm*", "/veramo*"]
+Nachher:
+paths: ["/messaging*", "/didcomm*", "/veramo*"]
+Erlaubte Pfade jetzt:
+✅ /messaging* - Veramo's DIDComm Endpoint
+✅ /didcomm* - Legacy/Alternative
+✅ /veramo* - Veramo API Endpoints
+Die Policies wurden erfolgreich in beiden Clustern angewendet! Veramo Endpoints sind jetzt erreichbar:
+http://localhost:7001/messaging (Cluster-A)
+http://localhost:7002/messaging (Cluster-B)
