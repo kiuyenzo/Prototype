@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(kubectl config use-context:*)",
-      "Bash(kubectl get:*)"
+      "Bash(kubectl get:*)",
+      "Bash(docker exec:*)",
+      "Bash(kubectl exec:*)"
     ],
     "deny": [],
     "ask": []

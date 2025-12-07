@@ -2,6 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install system dependencies (git is required by npm)
+RUN apk add --no-cache git python3 make g++
+
 # Install dependencies
 RUN npm install -g @veramo/cli typescript ts-node
 
