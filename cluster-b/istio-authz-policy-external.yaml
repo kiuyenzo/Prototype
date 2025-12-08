@@ -1,0 +1,15 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: veramo-nf-b-external-policy
+  namespace: nf-b-namespace
+spec:
+  selector:
+    matchLabels:
+      app: nf-b-didcomm-gateway
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        methods: ["POST", "GET"]
+        paths: ["/messaging*", "/didcomm*", "/veramo*", "/open-api.json"]

@@ -13,8 +13,9 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "nf-b.local"
-    - "nf-b.cluster-b.global"
+    - "*"
+    # - "nf-b.local"
+    # - "nf-b.cluster-b.global"
 ---
 # Egress Gateway - Ausgehender Traffic zu Cluster A
 apiVersion: networking.istio.io/v1beta1

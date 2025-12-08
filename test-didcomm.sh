@@ -28,7 +28,7 @@ wget -O- --post-data='{
       }
     }
   }
-}' --header='Content-Type: application/json' http://localhost:7001/agent 2>&1
+}' --header='Content-Type: application/json' --header='Authorization: Bearer test123' http://localhost:7001/agent 2>&1
 "
 
 echo ""
