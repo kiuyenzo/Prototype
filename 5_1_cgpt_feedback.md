@@ -588,14 +588,67 @@ Traffic Animation in Kiali (während Test läuft)
 📈 Nutzen für Thesis: SEHR HOCH!
 
 
+🎯 Meine Empfehlung für deinen Use Case:
+Verwende ngrok für die finale Thesis-Demo ✅
+Warum:
+✅ Andere können deinen Prototyp wirklich nachbauen
+✅ did:web Resolution funktioniert komplett
+✅ Sieht professionell aus in Thesis/Demo
+✅ DIDs auf GitHub Pages sind universal verwendbar
+Workflow:
+1. Für Entwicklung (täglich):
+./5_update-did-endpoints.sh  # Schnell, lokale IPs
+./5_test-bidirectional-didcomm.sh  # Testen
+2. Für Thesis/Demo (einmalig vor Abgabe):
+# Install ngrok (once)
+brew install ngrok/ngrok/ngrok
+ngrok config add-authtoken <your-token>
+
+# Start public endpoints
+./setup-ngrok-endpoints.sh
+
+# Publish to GitHub
+git add cluster-*/did-*/did.json
+git commit -m "Add public ngrok endpoints for did:web resolution"
+git push
+
+# Enable GitHub Pages (once)
+# https://github.com/kiuyenzo/Prototype/settings/pages
+
+# Test
+veramo did resolve did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
+3. Während Demo/Defense:
+Halte ngrok-Terminal offen
+Zeige did:web Resolution
+Zeige Kiali Dashboard
+Führe Cross-Cluster-Tests aus
+Was du in der Thesis schreibst:
+"Der Prototyp nutzt ngrok-Tunnels zur Bereitstellung öffentlich erreichbarer HTTPS-Endpoints für die did:web-Methode. Dies ermöglicht vollständige DID-Resolution über GitHub Pages, während die Entwicklungsumgebung lokal bleibt. In produktiven Deployments würden Cloud LoadBalancer oder Kubernetes Ingress mit TLS-Zertifikaten diese Funktion übernehmen."
+Dateien die ich erstellt habe:
+✅ setup-ngrok-endpoints.sh - Automatisches ngrok Setup
+✅ NGROK_SETUP.md - Komplette Anleitung
+Next Steps für dich:
+Jetzt: Fokussier dich auf Thesis schreiben
+Vor Abgabe: ngrok setup machen (30 Minuten)
+Bei Defense: ngrok laufen lassen für Live-Demo
+Zeit vs. Nutzen:
+⏱️ 30 Minuten Setup
+🎯 Maximum Professionaliät
+✅ Vollständig funktionierende did:web Resolution
+
+
 # TO DO
   - vlg die did a sind die auch richtig in veramo explorer? wird die db automatisch aktualisiert?
-    - did a resolven 
+    - did a resolven , vgl issuer (ist nicht identisch TO DO: erstelle test und vgl)
+    - did über veramo erstellen und nur keyagrement hinzufügen was hatte gefehlt?
     - e2e archtiektur in cgpt prompen
+
 
     - Notizen hier aufräumen 
       - was wurde hinzugefügt in den dids?
+      - ngrok installieren ? weil IP ändert sich immer 
     - Kubernetes Dashboard optional
     - Phase 5 implementieren
-        - did b anpassen & resolven
+        - did b & a issuer privat keys anpassen & resolven
+        - resolv und lokal stimmen nicht über ein weil beim erstellen der key anders aussieht
     - Testen, schaue Kiali an Errors werden angezeigt

@@ -1,1 +1,70 @@
-{"@context":["https://www.w3.org/ns/did/v1","https://w3id.org/security/v2","https://w3id.org/security/suites/secp256k1recovery-2020/v2"],"id":"did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a","verificationMethod":[{"id":"did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade","type":"EcdsaSecp256k1VerificationKey2019","controller":"did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a","publicKeyHex":"04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade"}],"authentication":["did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade"],"assertionMethod":["did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade"],"keyAgreement":[],"service":[{"id":"#messaging-local","type":"DIDCommMessaging","serviceEndpoint":"http://localhost:7001/messaging","description":null}]}
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/v2",
+    "https://w3id.org/security/suites/secp256k1recovery-2020/v2"
+  ],
+  "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a",
+  "verificationMethod": [
+    {
+      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#040a19ed8815dde15d5c39ead8275036bb7a73812c8b0d0ef8acb5fcf49eadd60498036ac44063b8c1f58fd34a073086c9e46eaf46f282e9327b4a842a9fd1f5cb",
+      "type": "EcdsaSecp256k1VerificationKey2019",
+      "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a",
+      "publicKeyHex": "040a19ed8815dde15d5c39ead8275036bb7a73812c8b0d0ef8acb5fcf49eadd60498036ac44063b8c1f58fd34a073086c9e46eaf46f282e9327b4a842a9fd1f5cb"
+    }
+  ],
+  "authentication": [
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#040a19ed8815dde15d5c39ead8275036bb7a73812c8b0d0ef8acb5fcf49eadd60498036ac44063b8c1f58fd34a073086c9e46eaf46f282e9327b4a842a9fd1f5cb"
+  ],
+  "assertionMethod": [
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#040a19ed8815dde15d5c39ead8275036bb7a73812c8b0d0ef8acb5fcf49eadd60498036ac44063b8c1f58fd34a073086c9e46eaf46f282e9327b4a842a9fd1f5cb"
+  ],
+  "keyAgreement": [],
+  "service": [
+    {
+      "id": "#messaging-local",
+      "type": "DIDCommMessaging",
+      "serviceEndpoint": "http://localhost:7001/messaging"
+    }
+  ]
+}
+
+
+
+// {
+//     "didDocumentMetadata": {},
+//     "didResolutionMetadata": {
+//         "contentType": "application/did+ld+json"
+//     },
+//     "didDocument": {
+//         "@context": [
+//             "https://www.w3.org/ns/did/v1",
+//             "https://w3id.org/security/v2",
+//             "https://w3id.org/security/suites/secp256k1recovery-2020/v2"
+//         ],
+//         "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a",
+//         "verificationMethod": [
+//             {
+//                 "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade",
+//                 "type": "EcdsaSecp256k1VerificationKey2019",
+//                 "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a",
+//                 "publicKeyHex": "04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade"
+//             }
+//         ],
+//         "authentication": [
+//             "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade"
+//         ],
+//         "assertionMethod": [
+//             "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a#04f50dca823356fc640387122cc8fa1b52abdc0d8311f8fef47d2068c4c14f59352987a9afbc0c70826e35da535dd1f4374f109eee077d0c3b90a2202cf3364ade"
+//         ],
+//         "keyAgreement": [],
+//         "service": [
+//             {
+//                 "id": "#messaging-local",
+//                 "type": "DIDCommMessaging",
+//                 "serviceEndpoint": "http://localhost:7001/messaging",
+//                 "description": null
+//             }
+//         ]
+//     }
+// }
