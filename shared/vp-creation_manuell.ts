@@ -8,24 +8,12 @@
  * 3. Selective Disclosure of credentials
  */
 
-import { createAgent, IAgent, IDataStore, IDIDManager, IKeyManager, IResolver } from '@veramo/core';
-import { DIDResolverPlugin } from '@veramo/did-resolver';
-import { CredentialPlugin, ICredentialIssuer, ICredentialVerifier } from '@veramo/credential-w3c';
-import { SelectiveDisclosure } from '@veramo/selective-disclosure';
 import { Resolver } from 'did-resolver';
 import { getResolver as webDidResolver } from 'web-did-resolver';
 import { PresentationDefinition } from './presentation-definitions.js';
 
-// Agent type with all required plugins
-type Agent = IAgent<
-  IDIDManager &
-  IKeyManager &
-  IDataStore &
-  IResolver &
-  ICredentialIssuer &
-  ICredentialVerifier &
-  SelectiveDisclosure
->;
+// Agent type (using any for flexibility with Veramo versions)
+type Agent = any;
 
 /**
  * Create a Verifiable Presentation from credentials
@@ -46,7 +34,31 @@ export async function createVerifiablePresentation(
     console.log(`📝 Creating VP for holder: ${holderDid}`);
     console.log(`   Including ${credentials.length} credential(s)`);
 
-    // Create the presentation
+    // Find the first key that can sign (has private key)
+    const identifier = await agent.didManagerGet({ did: holderDid });
+    let signingKey = null;
+
+    for (const key of identifier.keys) {
+      try {
+        // Test if we can sign with this key
+        await agent.keyManagerSign({
+          keyRef: key.kid,
+          data: 'test'
+        });
+        signingKey = key.kid;
+        console.log(`   Using signing key: ${signingKey.substring(0, 60)}...`);
+        break;
+      } catch (error) {
+        // Key can't sign, try next
+        continue;
+      }
+    }
+
+    if (!signingKey) {
+      throw new Error(`No signing key found for ${holderDid}`);
+    }
+
+    // Create the presentation with explicit key reference
     const verifiablePresentation = await agent.createVerifiablePresentation({
       presentation: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -55,6 +67,7 @@ export async function createVerifiablePresentation(
         verifiableCredential: credentials
       },
       proofFormat: 'jwt',
+      keyRef: signingKey,
       save: false
     });
 

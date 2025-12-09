@@ -12,8 +12,15 @@
 import { createAgent } from '@veramo/core';
 import { DIDResolverPlugin } from '@veramo/did-resolver';
 import { CredentialPlugin } from '@veramo/credential-w3c';
+import { KeyManager } from '@veramo/key-manager';
+import { DIDManager } from '@veramo/did-manager';
+import { KeyStore, DIDStore, PrivateKeyStore, DataStore, DataStoreORM } from '@veramo/data-store';
+import { KeyManagementSystem, SecretBox } from '@veramo/kms-local';
+import { WebDIDProvider } from '@veramo/did-provider-web';
 import { Resolver } from 'did-resolver';
 import { getResolver as webDidResolver } from 'web-did-resolver';
+import { DataSource } from 'typeorm';
+import { Entities, migrations } from '@veramo/data-store';
 import {
   createVPFromPD,
   verifyVPAgainstPD,
@@ -30,17 +37,68 @@ const DID_NF_A = 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a';
 const DID_NF_B = 'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b';
 const DID_ISSUER_A = 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a';
 
-// Create agent (read-only for testing)
-const agent = createAgent({
-  plugins: [
-    new DIDResolverPlugin({
-      resolver: new Resolver({
-        ...webDidResolver()
-      })
-    }),
-    new CredentialPlugin()
-  ]
-});
+// Database paths and encryption keys (from agent.yml)
+const DB_PATH_NF_A = '../cluster-a/database-nf-a.sqlite';
+const DB_ENCRYPTION_KEY_A = 'ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6';
+
+const DB_PATH_NF_B = '../cluster-b/database-nf-b.sqlite';
+const DB_ENCRYPTION_KEY_B = '3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d';
+
+/**
+ * Create a Veramo agent with database connection
+ * This agent has access to private keys and can sign VPs
+ */
+async function createAgentWithDatabase(dbPath: string, encryptionKey: string) {
+  // Create database connection
+  const dbConnection = new DataSource({
+    type: 'sqlite',
+    database: dbPath,
+    synchronize: false,
+    migrationsRun: true,
+    migrations,
+    logging: false,
+    entities: Entities,
+  });
+
+  await dbConnection.initialize();
+
+  // Create agent with full configuration
+  const agent = createAgent({
+    plugins: [
+      new KeyManager({
+        store: new KeyStore(dbConnection),
+        kms: {
+          local: new KeyManagementSystem(
+            new PrivateKeyStore(dbConnection, new SecretBox(encryptionKey))
+          ),
+        },
+      }),
+      new DIDManager({
+        store: new DIDStore(dbConnection),
+        defaultProvider: 'did:web',
+        providers: {
+          'did:web': new WebDIDProvider({
+            defaultKms: 'local',
+          }),
+        },
+      }),
+      new DIDResolverPlugin({
+        resolver: new Resolver({
+          ...webDidResolver(),
+        }),
+      }),
+      new CredentialPlugin(),
+      new DataStore(dbConnection),
+      new DataStoreORM(dbConnection),
+    ],
+  });
+
+  return agent;
+}
+
+// Agents will be initialized in runTest()
+let agentNFA: any;
+let agentNFB: any;
 
 /**
  * Mock credential for NF-B
@@ -87,10 +145,70 @@ const mockCredentialNFA = {
 
 async function runTest() {
   console.log('='.repeat(80));
-  console.log('🧪 VP Creation and Verification Test');
+  console.log('🧪 VP Creation and Verification Test (with Real Database)');
   console.log('='.repeat(80));
 
   try {
+    // ========================================================================
+    // SETUP: Initialize agents with database connections
+    // ========================================================================
+    console.log('\n🔧 SETUP: Initializing agents with database connections...');
+    console.log('-'.repeat(80));
+
+    agentNFA = await createAgentWithDatabase(DB_PATH_NF_A, DB_ENCRYPTION_KEY_A);
+    console.log('✅ Agent NF-A initialized');
+
+    agentNFB = await createAgentWithDatabase(DB_PATH_NF_B, DB_ENCRYPTION_KEY_B);
+    console.log('✅ Agent NF-B initialized');
+
+    // Load credentials from database
+    console.log('\n📂 Loading credentials from database...');
+    const credentialsNFA = await agentNFA.dataStoreORMGetVerifiableCredentials({
+      where: [{ column: 'subject', value: [DID_NF_A] }]
+    });
+    console.log(`   Found ${credentialsNFA.length} credential(s) for NF-A`);
+    if (credentialsNFA.length > 0) {
+      console.log('   Credential NF-A:', JSON.stringify(credentialsNFA[0], null, 2));
+    }
+
+    const credentialsNFB = await agentNFB.dataStoreORMGetVerifiableCredentials({
+      where: [{ column: 'subject', value: [DID_NF_B] }]
+    });
+    console.log(`   Found ${credentialsNFB.length} credential(s) for NF-B`);
+
+    // Filter for NetworkFunctionCredentials
+    const nfCredentialsNFA = credentialsNFA.filter(
+      (cred: any) => cred.verifiableCredential.type.includes('NetworkFunctionCredential')
+    );
+    const nfCredentialsNFB = credentialsNFB.filter(
+      (cred: any) => cred.verifiableCredential.type.includes('NetworkFunctionCredential')
+    );
+
+    console.log(`   Found ${nfCredentialsNFA.length} NetworkFunctionCredential(s) for NF-A`);
+    console.log(`   Found ${nfCredentialsNFB.length} NetworkFunctionCredential(s) for NF-B`);
+
+    if (nfCredentialsNFA.length > 0) {
+      console.log('   NF-A Credential:', JSON.stringify(nfCredentialsNFA[0].verifiableCredential, null, 2));
+    }
+    if (nfCredentialsNFB.length > 0) {
+      console.log('   NF-B Credential:', JSON.stringify(nfCredentialsNFB[0].verifiableCredential, null, 2));
+    }
+
+    if (nfCredentialsNFA.length === 0) {
+      console.log('⚠️  Warning: No NetworkFunctionCredentials found for NF-A. Using mock credential.');
+    }
+    if (nfCredentialsNFB.length === 0) {
+      console.log('⚠️  Warning: No NetworkFunctionCredentials found for NF-B. Using mock credential.');
+    }
+
+    // Use NetworkFunctionCredentials if available, otherwise fall back to mock
+    const credentialNFA = nfCredentialsNFA.length > 0
+      ? nfCredentialsNFA[0].verifiableCredential
+      : mockCredentialNFA;
+    const credentialNFB = nfCredentialsNFB.length > 0
+      ? nfCredentialsNFB[0].verifiableCredential
+      : mockCredentialNFB;
+
     // ========================================================================
     // PHASE 1: NF-A sends VP_Auth_Request with PD_A
     // ========================================================================
@@ -108,9 +226,9 @@ async function runTest() {
     console.log('-'.repeat(80));
 
     const vpB = await createVPFromPD(
-      agent as any,
+      agentNFB,
       DID_NF_B,
-      [mockCredentialNFB],
+      [credentialNFB],
       PRESENTATION_DEFINITION_A
     );
 
@@ -124,12 +242,8 @@ async function runTest() {
     console.log('\n🔍 PHASE 3: NF-A verifies VP_B');
     console.log('-'.repeat(80));
 
-    // Note: In a real scenario, this would use the actual JWT and verify the signature
-    // For this test, we're demonstrating the PD matching logic
-    console.log('⚠️  Note: Using mock credentials (signature verification skipped)');
-
     const verificationResult = await verifyVPAgainstPD(
-      agent as any,
+      agentNFA,
       vpB,
       PRESENTATION_DEFINITION_A
     );
@@ -149,9 +263,9 @@ async function runTest() {
     console.log('-'.repeat(80));
 
     const vpA = await createVPFromPD(
-      agent as any,
+      agentNFA,
       DID_NF_A,
-      [mockCredentialNFA],
+      [credentialNFA],
       PRESENTATION_DEFINITION_B
     );
 
@@ -166,7 +280,7 @@ async function runTest() {
     console.log('-'.repeat(80));
 
     const verificationResultA = await verifyVPAgainstPD(
-      agent as any,
+      agentNFB,
       vpA,
       PRESENTATION_DEFINITION_B
     );
