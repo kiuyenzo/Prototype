@@ -1,5 +1,58 @@
 
-# neu machen 
+# neu machen
+
+
+📋 Was fehlt für deinen Prototyp:
+✅ VORHANDEN:
+✅ DIDs (did:web) auf GitHub Pages
+✅ Verifiable Credentials (VCs)
+✅ VC Verification
+✅ DIDComm Messaging (Basis vorhanden)
+✅ Istio Gateway Configs
+✅ mTLS Konfiguration
+
+❌ FEHLT:
+1. Verifiable Presentations (VP) + Presentation Exchange
+❌ VP erstellen mit @veramo/selective-disclosure
+❌ Presentation Definition (PD) definieren
+❌ VP Verification implementieren
+
+2. Vollständiger Auth-Flow
+❌ VP_Auth_Request senden (mit PD_A)
+❌ VP_B basierend auf PD_A erstellen
+❌ VP_A basierend auf PD_B erstellen
+❌ Mutual Authentication Logik
+
+3. Envoy Proxy Integration
+❌ Envoy Proxy Container in NF Pods
+❌ HTTP/2 Forwarding zu Envoy Gateway
+❌ DIDComm über Envoy routen
+
+4. NF Services (Mock)
+❌ NF_A Service (kann einfacher HTTP Server sein)
+❌ NF_B Service
+❌ Integration: Veramo ↔ NF
+
+5. End-to-End Flow
+❌ Kompletter Ablauf von Phase 1 → Phase 3
+❌ Session Management nach Auth
+❌ Service Request/Response nach Authorization
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# alt
 # Phase 5 – Veramo Agent Integration
 
 **Ziel:** Integration des echten Veramo Agents in die bestehende Istio-Infrastruktur mit DIDComm-Support.

@@ -638,9 +638,12 @@ Zeit vs. Nutzen:
 
 
 # TO DO
+# am Ende die dids vllt nochmal neu erstellen lassen
   - vlg die did a sind die auch richtig in veramo explorer? wird die db automatisch aktualisiert?
     - did a resolven , vgl issuer (ist nicht identisch TO DO: erstelle test und vgl)
     - did über veramo erstellen und nur keyagrement hinzufügen was hatte gefehlt?
+
+
     - e2e archtiektur in cgpt prompen
 
 
