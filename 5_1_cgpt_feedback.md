@@ -652,6 +652,6 @@ Zeit vs. Nutzen:
       - ngrok installieren ? weil IP ändert sich immer 
     - Kubernetes Dashboard optional
     - Phase 5 implementieren
-        - did b & a issuer privat keys anpassen & resolven
+        - did b & a issuer privat keys anpassen & resolven oder did key nutzen 
         - resolv und lokal stimmen nicht über ein weil beim erstellen der key anders aussieht
     - Testen, schaue Kiali an Errors werden angezeigt

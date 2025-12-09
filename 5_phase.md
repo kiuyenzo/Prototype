@@ -17,6 +17,61 @@
 ❌ Presentation Definition (PD) definieren
 ❌ VP Verification implementieren
 
+Presentations (VP):
+✅ Werden on-demand erstellt
+✅ NICHT dauerhaft gespeichert
+✅ Jedes Mal neu wenn angefordert
+📤 Wie "Ausweis vorzeigen" - passiert live
+
+installieren: npm list @veramo/core @veramo/credential-w3c @veramo/selective-disclosure 2>&1 | head -20
+
+npm install @sphereon/pex 2>&1 | tail -10
+
+
+package.json auf ESM umstellen:
+
+
+📦 Was erstellt wurde:
+
+1. presentation-definitions.ts
+✅ PD_A: Was NF-A von NF-B fordert
+✅ PD_B: Was NF-B von NF-A fordert
+✅ TypeScript Interfaces für Presentation Definitions
+
+2. vp-creation.ts
+✅ createVerifiablePresentation() - VP erstellen
+✅ verifyVerifiablePresentation() - VP verifizieren
+✅ selectCredentialsForPD() - Credentials für PD auswählen
+✅ createVPFromPD() - Hauptfunktion für Presentation Exchange
+✅ verifyVPAgainstPD() - VP gegen PD verifizieren
+
+3. test-vp-flow.ts
+✅ Kompletter Test des Mutual Authentication Flows
+✅ Phase 1-5: Von Auth-Request bis zu beiden verifizierten VPs
+
+🚀 Wie du es testest:
+# TypeScript kompilieren und ausführen
+npx ts-node test-vp-flow.ts
+Oder wenn du ts-node installieren musst:
+npm install -g ts-node typescript
+ts-node test-vp-flow.ts
+
+✅ Was jetzt funktioniert:
+✅ Presentation Definitions sind definiert
+✅ VP Creation basierend auf PDs
+✅ VP Verification gegen PDs
+✅ Credential Selection (Presentation Exchange)
+✅ Mutual Authentication Flow implementiert
+Sollen wir das jetzt testen? 🧪
+
+
+test-vp-flow.ts
+klappt nicht weil did b erstellt werden muss 
+nutze pd package
+
+
+
+
 2. Vollständiger Auth-Flow
 ❌ VP_Auth_Request senden (mit PD_A)
 ❌ VP_B basierend auf PD_A erstellen
