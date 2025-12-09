@@ -7,31 +7,25 @@
   "id": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b",
   "verificationMethod": [
     {
-      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b#04adcc7025a6ff971ce76c460d2eb9637ad0b276144f3cfabe7f8f52931a0e9bf68866300ea7e9c6d2bbbb03c24bc0b6e31caceb1aeb01ccceeb284c0c63241535",
+      "id": "044821d8a332346b8e7c67f6aea9f7f7db865350894da509f60f37cd9880974e558daa9246b739cbdf899eb7130bf116c257d59af1c53275167d285d6808fd1393",
       "type": "EcdsaSecp256k1VerificationKey2019",
       "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b",
-      "publicKeyHex": "04adcc7025a6ff971ce76c460d2eb9637ad0b276144f3cfabe7f8f52931a0e9bf68866300ea7e9c6d2bbbb03c24bc0b6e31caceb1aeb01ccceeb284c0c63241535"
+      "publicKeyHex": "044821d8a332346b8e7c67f6aea9f7f7db865350894da509f60f37cd9880974e558daa9246b739cbdf899eb7130bf116c257d59af1c53275167d285d6808fd1393"
     }
   ],
   "authentication": [
-    "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b#04adcc7025a6ff971ce76c460d2eb9637ad0b276144f3cfabe7f8f52931a0e9bf68866300ea7e9c6d2bbbb03c24bc0b6e31caceb1aeb01ccceeb284c0c63241535"
+    "044821d8a332346b8e7c67f6aea9f7f7db865350894da509f60f37cd9880974e558daa9246b739cbdf899eb7130bf116c257d59af1c53275167d285d6808fd1393"
   ],
   "assertionMethod": [
-    "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b#04adcc7025a6ff971ce76c460d2eb9637ad0b276144f3cfabe7f8f52931a0e9bf68866300ea7e9c6d2bbbb03c24bc0b6e31caceb1aeb01ccceeb284c0c63241535"
+    "044821d8a332346b8e7c67f6aea9f7f7db865350894da509f60f37cd9880974e558daa9246b739cbdf899eb7130bf116c257d59af1c53275167d285d6808fd1393"
   ],
-  "keyAgreement": [
-    {
-      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b#2fac6a8f07af2f3af4e6cc9e0fa427e1e5ab50f3121d5fa6095ad3fe231c8c60",
-      "type": "X25519KeyAgreementKey2019",
-      "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b",
-      "publicKeyHex": "2fac6a8f07af2f3af4e6cc9e0fa427e1e5ab50f3121d5fa6095ad3fe231c8c60"
-    }
-  ],
+  "keyAgreement": [],
   "service": [
     {
-      "id": "#messaging",
+      "id": "#messaging-local",
       "type": "DIDCommMessaging",
-      "serviceEndpoint": "http://172.23.0.3:30132/messaging"
+      "serviceEndpoint": "http://localhost:3331/messaging",
+      "description": null
     }
   ]
 }
