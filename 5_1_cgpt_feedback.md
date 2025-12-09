@@ -659,6 +659,8 @@ Zeit vs. Nutzen:
         - resolv und lokal stimmen nicht über ein weil beim erstellen der key anders aussieht
     - Testen, schaue Kiali an Errors werden angezeigt
 
+# dids universal,vc machen und datenbank?
+
 # implementiert
 
     Perfekt! Der Push läuft. Während GitHub Pages aktualisiert wird (dauert 1-2 Minuten), gebe ich dir eine Zusammenfassung:

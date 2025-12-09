@@ -71,6 +71,7 @@ nutze pd package
 
 
 
+
 2. Vollständiger Auth-Flow
 ❌ VP_Auth_Request senden (mit PD_A)
 ❌ VP_B basierend auf PD_A erstellen
