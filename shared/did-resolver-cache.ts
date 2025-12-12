@@ -1,0 +1,169 @@
+#!/usr/bin/env ts-node
+/**
+ * Local DID Document Cache for Testing
+ *
+ * This module provides cached DID documents for NF-A and NF-B
+ * to avoid external HTTPS resolution during testing.
+ *
+ * In production, this would be replaced with:
+ * - Universal Resolver
+ * - Local DID registry
+ * - Cached DID documents from previous resolutions
+ */
+
+import fs from 'fs';
+import path from 'path';
+
+/**
+ * Cache for resolved DID documents
+ */
+const didDocumentCache: Map<string, any> = new Map();
+
+/**
+ * Known DID document file paths
+ */
+const DID_PATHS: Record<string, string> = {
+  'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a': '../cluster-a/did-nf-a/did.json',
+  'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b': '../cluster-b/did-nf-b/did.json',
+};
+
+/**
+ * Load a DID document from local filesystem
+ */
+function loadLocalDIDDocument(did: string): any | null {
+  try {
+    const relativePath = DID_PATHS[did];
+    if (!relativePath) {
+      console.log(`⚠️  No local DID document path for ${did}`);
+      return null;
+    }
+
+    // Resolve path relative to this file
+    const fullPath = path.resolve(__dirname, relativePath);
+
+    if (!fs.existsSync(fullPath)) {
+      console.log(`⚠️  DID document not found at ${fullPath}`);
+      return null;
+    }
+
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    const didDocument = JSON.parse(content);
+
+    console.log(`✅ Loaded local DID document for ${did}`);
+    return didDocument;
+  } catch (error: any) {
+    console.error(`❌ Error loading DID document:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Resolve a DID document (with local cache)
+ *
+ * @param did - DID to resolve
+ * @param agent - Veramo agent (optional, for fallback resolution)
+ * @returns DID document or null
+ */
+export async function resolveDIDDocument(did: string, agent?: any): Promise<any | null> {
+  // Check cache first
+  if (didDocumentCache.has(did)) {
+    console.log(`📦 Using cached DID document for ${did}`);
+    return didDocumentCache.get(did);
+  }
+
+  // Try local file first
+  const localDoc = loadLocalDIDDocument(did);
+  if (localDoc) {
+    didDocumentCache.set(did, localDoc);
+    return localDoc;
+  }
+
+  // Fallback to agent resolution
+  if (agent && agent.resolveDid) {
+    try {
+      console.log(`🔍 Resolving DID via agent: ${did}`);
+      const result = await agent.resolveDid({ didUrl: did });
+      if (result && result.didDocument) {
+        didDocumentCache.set(did, result.didDocument);
+        return result.didDocument;
+      }
+    } catch (error: any) {
+      console.error(`❌ Agent DID resolution failed:`, error.message);
+    }
+  }
+
+  console.error(`❌ Could not resolve DID: ${did}`);
+  return null;
+}
+
+/**
+ * Extract encryption key from DID document
+ *
+ * @param didDocument - DID document
+ * @returns Public key for encryption or null
+ */
+export function extractEncryptionKey(didDocument: any): any | null {
+  if (!didDocument || !didDocument.verificationMethod) {
+    return null;
+  }
+
+  // Look for keyAgreement keys (used for encryption)
+  if (didDocument.keyAgreement && didDocument.keyAgreement.length > 0) {
+    const keyAgreementId = didDocument.keyAgreement[0];
+
+    // Find the verification method
+    const keyMethod = didDocument.verificationMethod.find(
+      (vm: any) => vm.id === keyAgreementId || vm.id.endsWith(keyAgreementId.split('#')[1])
+    );
+
+    if (keyMethod) {
+      console.log(`✅ Found keyAgreement key: ${keyMethod.id}`);
+      return keyMethod;
+    }
+  }
+
+  // Fallback: use first verification method
+  const firstKey = didDocument.verificationMethod[0];
+  console.log(`⚠️  No keyAgreement found, using first key: ${firstKey?.id}`);
+  return firstKey;
+}
+
+/**
+ * Get recipient public key for encryption
+ *
+ * @param recipientDid - DID of the recipient
+ * @param agent - Veramo agent
+ * @returns Public key or null
+ */
+export async function getRecipientPublicKey(recipientDid: string, agent?: any): Promise<any | null> {
+  const didDocument = await resolveDIDDocument(recipientDid, agent);
+  if (!didDocument) {
+    return null;
+  }
+
+  return extractEncryptionKey(didDocument);
+}
+
+/**
+ * Pre-cache known DIDs for faster access
+ */
+export function precacheDIDs(): void {
+  console.log('📦 Pre-caching known DIDs...');
+
+  for (const did of Object.keys(DID_PATHS)) {
+    const doc = loadLocalDIDDocument(did);
+    if (doc) {
+      didDocumentCache.set(did, doc);
+    }
+  }
+
+  console.log(`✅ Cached ${didDocumentCache.size} DID documents`);
+}
+
+/**
+ * Clear DID cache
+ */
+export function clearCache(): void {
+  didDocumentCache.clear();
+  console.log('🗑️  DID cache cleared');
+}

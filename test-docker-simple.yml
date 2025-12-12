@@ -1,0 +1,47 @@
+# Simplified Docker Compose for Testing
+# Just Veramo agents without Envoy (for debugging)
+
+version: '3.8'
+
+services:
+  # Veramo Agent NF-A
+  veramo-nf-a:
+    image: node:20-alpine
+    container_name: veramo-nf-a-test
+    working_dir: /app/prototype
+    volumes:
+      - .:/app/prototype
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "
+        apk add --no-cache python3 make g++ &&
+        cd /app/prototype &&
+        npm install &&
+        npm rebuild sqlite3 &&
+        cd /app/prototype/shared &&
+        PORT=3000 DID_NF_A=did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a DB_PATH=/app/prototype/cluster-a/database-nf-a.sqlite DB_ENCRYPTION_KEY=ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6 node didcomm-http-server.js
+      "
+    environment:
+      - NODE_ENV=development
+
+  # Veramo Agent NF-B
+  veramo-nf-b:
+    image: node:20-alpine
+    container_name: veramo-nf-b-test
+    working_dir: /app/prototype
+    volumes:
+      - .:/app/prototype
+    ports:
+      - "3001:3000"
+    command: >
+      sh -c "
+        apk add --no-cache python3 make g++ &&
+        cd /app/prototype &&
+        npm install &&
+        npm rebuild sqlite3 &&
+        cd /app/prototype/shared &&
+        PORT=3000 DID_NF_B=did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b DB_PATH=/app/prototype/cluster-b/database-nf-b.sqlite DB_ENCRYPTION_KEY=3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d node didcomm-http-server.js
+      "
+    environment:
+      - NODE_ENV=development

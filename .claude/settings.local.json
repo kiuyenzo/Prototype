@@ -4,7 +4,8 @@
       "Bash(kubectl config use-context:*)",
       "Bash(kubectl get:*)",
       "Bash(docker exec:*)",
-      "Bash(kubectl exec:*)"
+      "Bash(kubectl exec:*)",
+      "Bash(node /Users/tanja/Desktop/Prototype/shared/test-envoy-e2e.js:*)"
     ],
     "deny": [],
     "ask": []

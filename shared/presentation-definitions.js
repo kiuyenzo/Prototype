@@ -1,14 +1,17 @@
+"use strict";
 /**
  * Presentation Definitions for Mutual Authentication
  *
  * PD_A: What NF-A requests from NF-B
  * PD_B: What NF-B requests from NF-A
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PRESENTATION_DEFINITION_SPECIFIC_CLUSTER = exports.PRESENTATION_DEFINITION_B = exports.PRESENTATION_DEFINITION_A = void 0;
 /**
  * PD_A: NF-A requests proof that NF-B is an authorized Network Function
  * This will be sent in the initial VP_Auth_Request
  */
-export const PRESENTATION_DEFINITION_A = {
+exports.PRESENTATION_DEFINITION_A = {
     id: 'pd-nf-auth-request-a',
     input_descriptors: [
         {
@@ -47,7 +50,7 @@ export const PRESENTATION_DEFINITION_A = {
  * PD_B: NF-B requests proof that NF-A is an authorized Network Function
  * This will be sent as part of VP_B response
  */
-export const PRESENTATION_DEFINITION_B = {
+exports.PRESENTATION_DEFINITION_B = {
     id: 'pd-nf-auth-request-b',
     input_descriptors: [
         {
@@ -92,7 +95,7 @@ export const PRESENTATION_DEFINITION_B = {
 /**
  * Example: More restrictive PD that requires specific cluster
  */
-export const PRESENTATION_DEFINITION_SPECIFIC_CLUSTER = {
+exports.PRESENTATION_DEFINITION_SPECIFIC_CLUSTER = {
     id: 'pd-cluster-specific',
     input_descriptors: [
         {

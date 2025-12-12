@@ -30,3 +30,4 @@ kubectl config use-context kind-cluster-b
 kubectl exec -n nf-b-namespace $POD_B -c veramo-nf-b -- sh -c "
 cd /app/cluster-b && veramo did list
 "
+

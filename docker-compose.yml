@@ -1,0 +1,133 @@
+# Docker Compose for Full Stack with Custom Veramo Image
+# Ready for Kubernetes migration
+
+version: '3.8'
+
+services:
+  # Veramo Agent NF-A
+  veramo-nf-a:
+    image: node:20-alpine
+    container_name: veramo-nf-a
+    working_dir: /app/prototype
+    volumes:
+      - .:/app/prototype
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "
+        apk add --no-cache python3 make g++ &&
+        cd /app/prototype &&
+        npm install &&
+        npm rebuild sqlite3 &&
+        cd /app/prototype/shared &&
+        PORT=3000 node didcomm-http-server.js
+      "
+    networks:
+      - cluster-a-network
+      - inter-cluster-network
+    environment:
+      - NODE_ENV=development
+      - DID_NF_A=did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
+      - DB_PATH=/app/database-nf-a.sqlite
+      - DB_ENCRYPTION_KEY=ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6
+
+  # Envoy Proxy for NF-A
+  envoy-proxy-nf-a:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: envoy-proxy-nf-a
+    volumes:
+      - ./cluster-a/envoy/envoy-proxy-nf-a.yaml:/etc/envoy/envoy.yaml:ro
+      - ./cluster-a/envoy/certs:/etc/envoy/certs:ro
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "9901:9901"
+    networks:
+      - cluster-a-network
+    depends_on:
+      - veramo-nf-a
+
+  # Envoy Gateway for Cluster A
+  envoy-gateway-a:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: envoy-gateway-a
+    volumes:
+      - ./cluster-a/envoy/envoy-gateway-a.yaml:/etc/envoy/envoy.yaml:ro
+      - ./cluster-a/envoy/certs:/etc/envoy/certs:ro
+    ports:
+      - "8443:8443"
+      - "8444:8444"
+      - "9902:9902"
+    networks:
+      - cluster-a-network
+      - inter-cluster-network
+    depends_on:
+      - envoy-proxy-nf-a
+
+  # Veramo Agent NF-B
+  veramo-nf-b:
+    image: node:20-alpine
+    container_name: veramo-nf-b
+    working_dir: /app/prototype
+    volumes:
+      - .:/app/prototype
+    ports:
+      - "3001:3000"
+    command: >
+      sh -c "
+        apk add --no-cache python3 make g++ &&
+        cd /app/prototype &&
+        npm install &&
+        npm rebuild sqlite3 &&
+        cd /app/prototype/shared &&
+        PORT=3000 node didcomm-http-server.js
+      "
+    networks:
+      - cluster-b-network
+      - inter-cluster-network
+    environment:
+      - NODE_ENV=production
+      - DID_NF_B=did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
+      - DB_PATH=/app/database-nf-b.sqlite
+      - DB_ENCRYPTION_KEY=3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d
+
+  # Envoy Proxy for NF-B
+  envoy-proxy-nf-b:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: envoy-proxy-nf-b
+    volumes:
+      - ./cluster-b/envoy/envoy-proxy-nf-b.yaml:/etc/envoy/envoy.yaml:ro
+      - ./cluster-b/envoy/certs:/etc/envoy/certs:ro
+    ports:
+      - "8082:8080"
+      - "8083:8081"
+      - "9903:9901"
+    networks:
+      - cluster-b-network
+    depends_on:
+      - veramo-nf-b
+
+  # Envoy Gateway for Cluster B
+  envoy-gateway-b:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: envoy-gateway-b
+    volumes:
+      - ./cluster-b/envoy/envoy-gateway-b.yaml:/etc/envoy/envoy.yaml:ro
+      - ./cluster-b/envoy/certs:/etc/envoy/certs:ro
+    ports:
+      - "8445:8443"
+      - "8446:8444"
+      - "9904:9902"
+    networks:
+      - cluster-b-network
+      - inter-cluster-network
+    depends_on:
+      - envoy-proxy-nf-b
+
+networks:
+  cluster-a-network:
+    driver: bridge
+  cluster-b-network:
+    driver: bridge
+  inter-cluster-network:
+    driver: bridge

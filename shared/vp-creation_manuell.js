@@ -1,4 +1,5 @@
 #!/usr/bin/env ts-node
+"use strict";
 /**
  * Verifiable Presentation Creation with Presentation Exchange
  *
@@ -7,6 +8,12 @@
  * 2. Verifying VPs against Presentation Definitions
  * 3. Selective Disclosure of credentials
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createVerifiablePresentation = createVerifiablePresentation;
+exports.verifyVerifiablePresentation = verifyVerifiablePresentation;
+exports.selectCredentialsForPD = selectCredentialsForPD;
+exports.createVPFromPD = createVPFromPD;
+exports.verifyVPAgainstPD = verifyVPAgainstPD;
 /**
  * Create a Verifiable Presentation from credentials
  *
@@ -16,7 +23,7 @@
  * @param presentationDefinition - Optional PD for selective disclosure
  * @returns Verifiable Presentation
  */
-export async function createVerifiablePresentation(agent, holderDid, credentials, presentationDefinition) {
+async function createVerifiablePresentation(agent, holderDid, credentials, presentationDefinition) {
     try {
         console.log(`📝 Creating VP for holder: ${holderDid}`);
         console.log(`   Including ${credentials.length} credential(s)`);
@@ -70,7 +77,7 @@ export async function createVerifiablePresentation(agent, holderDid, credentials
  * @param presentation - The VP to verify
  * @returns Verification result
  */
-export async function verifyVerifiablePresentation(agent, presentation) {
+async function verifyVerifiablePresentation(agent, presentation) {
     try {
         console.log('🔍 Verifying Verifiable Presentation...');
         const result = await agent.verifyPresentation({
@@ -102,7 +109,7 @@ export async function verifyVerifiablePresentation(agent, presentation) {
  * @param presentationDefinition - PD to match against
  * @returns Matching credentials
  */
-export function selectCredentialsForPD(credentials, presentationDefinition) {
+function selectCredentialsForPD(credentials, presentationDefinition) {
     console.log('🔍 Selecting credentials for PD:', presentationDefinition.id);
     const matchingCredentials = [];
     for (const inputDescriptor of presentationDefinition.input_descriptors) {
@@ -149,8 +156,17 @@ function matchesField(credential, field) {
             }
             if (field.filter.pattern) {
                 const regex = new RegExp(field.filter.pattern);
-                if (!regex.test(String(value))) {
-                    return false;
+                // Handle both string values and arrays (e.g., credential types)
+                if (Array.isArray(value)) {
+                    // For arrays, check if any element matches the pattern
+                    if (!value.some(v => regex.test(String(v)))) {
+                        return false;
+                    }
+                }
+                else {
+                    if (!regex.test(String(value))) {
+                        return false;
+                    }
                 }
             }
         }
@@ -189,7 +205,7 @@ function getValueByPath(obj, path) {
  * @param presentationDefinition - PD from the verifier
  * @returns VP containing selected credentials
  */
-export async function createVPFromPD(agent, holderDid, availableCredentials, presentationDefinition) {
+async function createVPFromPD(agent, holderDid, availableCredentials, presentationDefinition) {
     console.log('📋 Creating VP from Presentation Definition');
     // Step 1: Select credentials that match PD
     const selectedCredentials = selectCredentialsForPD(availableCredentials, presentationDefinition);
@@ -208,7 +224,7 @@ export async function createVPFromPD(agent, holderDid, availableCredentials, pre
  * @param presentationDefinition - Expected PD
  * @returns Verification result
  */
-export async function verifyVPAgainstPD(agent, presentation, presentationDefinition) {
+async function verifyVPAgainstPD(agent, presentation, presentationDefinition) {
     console.log('🔍 Verifying VP against Presentation Definition');
     // Step 1: Verify the VP cryptographically
     const cryptoResult = await verifyVerifiablePresentation(agent, presentation);
@@ -230,7 +246,7 @@ export async function verifyVPAgainstPD(agent, presentation, presentationDefinit
     return { verified: true };
 }
 // Export for use in other modules
-export default {
+exports.default = {
     createVerifiablePresentation,
     verifyVerifiablePresentation,
     selectCredentialsForPD,

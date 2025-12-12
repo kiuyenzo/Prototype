@@ -1,0 +1,51 @@
+# Node modules - commented to allow copying for Docker build
+# node_modules/
+npm-debug.log
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+*.test.ts
+*.test.js
+test-*.ts
+test-*.js
+
+# Documentation
+*.md
+docs/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Envoy configs (not needed in Veramo image)
+cluster-a/envoy/
+cluster-b/envoy/
+
+# Databases (will be mounted as volumes)
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Certificates (will be mounted as secrets in K8s)
+*.pem
+*.key
+*.crt
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+
+# Build artifacts
+dist/
+build/
