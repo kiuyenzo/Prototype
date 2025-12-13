@@ -7,36 +7,26 @@
   "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
   "verificationMethod": [
     {
-      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#045e47622f68ac7869d7ba3f3ed4e929f3a2fa376328b4658de4895345f04d14748be846dc9291eff85693398eacddd9d82678f42cee8b7258f9b17c443fdac9e6",
+      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#0460d2fac1508ed7c2ed2db0bbd9bea8fc3c45149e12ce25e25654022a8a00403a3bd5a739c7b1ad90d9f3c5c90a960f7d7d4cc3b372806ca73c9225aaf6ea26d9",
       "type": "EcdsaSecp256k1VerificationKey2019",
       "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
-      "publicKeyHex": "045e47622f68ac7869d7ba3f3ed4e929f3a2fa376328b4658de4895345f04d14748be846dc9291eff85693398eacddd9d82678f42cee8b7258f9b17c443fdac9e6"
+      "publicKeyHex": "0460d2fac1508ed7c2ed2db0bbd9bea8fc3c45149e12ce25e25654022a8a00403a3bd5a739c7b1ad90d9f3c5c90a960f7d7d4cc3b372806ca73c9225aaf6ea26d9"
     },
     {
-      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e",
+      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#db6ab88ae7dd5efed537ad13c74447134c3ec01271545a73108c9973e2d28936",
       "type": "X25519KeyAgreementKey2019",
       "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
-      "publicKeyHex": "b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e"
-    },
-    {
-      "id": "04dd3f39a5ab3d26a48d5275e824a440d81dd0095d00a22835a204f4a7f69d0ed74f7ec12c39dedaeefa24db3329534cf8b5eda7457cb7d23c2d22f1da4d74e169",
-      "type": "EcdsaSecp256k1VerificationKey2019",
-      "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
-      "publicKeyHex": "04dd3f39a5ab3d26a48d5275e824a440d81dd0095d00a22835a204f4a7f69d0ed74f7ec12c39dedaeefa24db3329534cf8b5eda7457cb7d23c2d22f1da4d74e169"
+      "publicKeyHex": "db6ab88ae7dd5efed537ad13c74447134c3ec01271545a73108c9973e2d28936"
     }
   ],
   "authentication": [
-    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#045e47622f68ac7869d7ba3f3ed4e929f3a2fa376328b4658de4895345f04d14748be846dc9291eff85693398eacddd9d82678f42cee8b7258f9b17c443fdac9e6",
-    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e",
-    "04dd3f39a5ab3d26a48d5275e824a440d81dd0095d00a22835a204f4a7f69d0ed74f7ec12c39dedaeefa24db3329534cf8b5eda7457cb7d23c2d22f1da4d74e169"
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#0460d2fac1508ed7c2ed2db0bbd9bea8fc3c45149e12ce25e25654022a8a00403a3bd5a739c7b1ad90d9f3c5c90a960f7d7d4cc3b372806ca73c9225aaf6ea26d9"
   ],
   "assertionMethod": [
-    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#045e47622f68ac7869d7ba3f3ed4e929f3a2fa376328b4658de4895345f04d14748be846dc9291eff85693398eacddd9d82678f42cee8b7258f9b17c443fdac9e6",
-    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e",
-    "04dd3f39a5ab3d26a48d5275e824a440d81dd0095d00a22835a204f4a7f69d0ed74f7ec12c39dedaeefa24db3329534cf8b5eda7457cb7d23c2d22f1da4d74e169"
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#0460d2fac1508ed7c2ed2db0bbd9bea8fc3c45149e12ce25e25654022a8a00403a3bd5a739c7b1ad90d9f3c5c90a960f7d7d4cc3b372806ca73c9225aaf6ea26d9"
   ],
   "keyAgreement": [
-    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e"
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#db6ab88ae7dd5efed537ad13c74447134c3ec01271545a73108c9973e2d28936"
   ],
   "service": [
     {
