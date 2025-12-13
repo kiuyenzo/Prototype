@@ -43,7 +43,7 @@
       "id": "#messaging",
       "type": "DIDCommMessaging",
       "serviceEndpoint": "http://172.23.0.2:31829/messaging",
-      "description": ""
+      "description": "DIDComm messaging endpoint for NF-A (Kubernetes NodePort)"
     }
   ]
 }

@@ -30,10 +30,10 @@
   ],
   "service": [
     {
-      "id": "#messaging-local",
+      "id": "#messaging",
       "type": "DIDCommMessaging",
-      "serviceEndpoint": "http://localhost:3331/messaging",
-      "description": null
+      "serviceEndpoint": "http://172.23.0.3:30132/messaging",
+      "description": "DIDComm messaging endpoint for NF-B (Kubernetes NodePort)"
     }
   ]
 }
