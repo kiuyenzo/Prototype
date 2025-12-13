@@ -11,6 +11,12 @@
       "type": "EcdsaSecp256k1VerificationKey2019",
       "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b",
       "publicKeyHex": "044821d8a332346b8e7c67f6aea9f7f7db865350894da509f60f37cd9880974e558daa9246b739cbdf899eb7130bf116c257d59af1c53275167d285d6808fd1393"
+    },
+    {
+      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b#88e3b5279545113d430f0a8771b8d3df3c6e6ca67654ddf8953bdfa98883b671",
+      "type": "X25519KeyAgreementKey2019",
+      "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b",
+      "publicKeyHex": "88e3b5279545113d430f0a8771b8d3df3c6e6ca67654ddf8953bdfa98883b671"
     }
   ],
   "authentication": [
@@ -19,7 +25,9 @@
   "assertionMethod": [
     "044821d8a332346b8e7c67f6aea9f7f7db865350894da509f60f37cd9880974e558daa9246b739cbdf899eb7130bf116c257d59af1c53275167d285d6808fd1393"
   ],
-  "keyAgreement": [],
+  "keyAgreement": [
+    "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b#88e3b5279545113d430f0a8771b8d3df3c6e6ca67654ddf8953bdfa98883b671"
+  ],
   "service": [
     {
       "id": "#messaging-local",

@@ -28,7 +28,7 @@ services:
     environment:
       - NODE_ENV=development
       - DID_NF_A=did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
-      - DB_PATH=/app/database-nf-a.sqlite
+      - DB_PATH=/app/prototype/cluster-a/database-nf-a.sqlite
       - DB_ENCRYPTION_KEY=ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6
 
   # Envoy Proxy for NF-A
@@ -88,7 +88,7 @@ services:
     environment:
       - NODE_ENV=production
       - DID_NF_B=did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
-      - DB_PATH=/app/database-nf-b.sqlite
+      - DB_PATH=/app/prototype/cluster-b/database-nf-b.sqlite
       - DB_ENCRYPTION_KEY=3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d
 
   # Envoy Proxy for NF-B

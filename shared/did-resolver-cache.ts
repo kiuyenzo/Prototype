@@ -11,8 +11,7 @@
  * - Cached DID documents from previous resolutions
  */
 
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
 
 /**
  * Cache for resolved DID documents
@@ -20,11 +19,11 @@ import path from 'path';
 const didDocumentCache: Map<string, any> = new Map();
 
 /**
- * Known DID document file paths
+ * Known DID document file paths (absolute paths from container root)
  */
 const DID_PATHS: Record<string, string> = {
-  'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a': '../cluster-a/did-nf-a/did.json',
-  'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b': '../cluster-b/did-nf-b/did.json',
+  'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a': '/app/prototype/cluster-a/did-nf-a/did.json',
+  'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b': '/app/prototype/cluster-b/did-nf-b/did.json',
 };
 
 /**
@@ -32,21 +31,18 @@ const DID_PATHS: Record<string, string> = {
  */
 function loadLocalDIDDocument(did: string): any | null {
   try {
-    const relativePath = DID_PATHS[did];
-    if (!relativePath) {
+    const filePath = DID_PATHS[did];
+    if (!filePath) {
       console.log(`⚠️  No local DID document path for ${did}`);
       return null;
     }
 
-    // Resolve path relative to this file
-    const fullPath = path.resolve(__dirname, relativePath);
-
-    if (!fs.existsSync(fullPath)) {
-      console.log(`⚠️  DID document not found at ${fullPath}`);
+    if (!fs.existsSync(filePath)) {
+      console.log(`⚠️  DID document not found at ${filePath}`);
       return null;
     }
 
-    const content = fs.readFileSync(fullPath, 'utf-8');
+    const content = fs.readFileSync(filePath, 'utf-8');
     const didDocument = JSON.parse(content);
 
     console.log(`✅ Loaded local DID document for ${did}`);

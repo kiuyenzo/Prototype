@@ -13,10 +13,10 @@
       "publicKeyHex": "045e47622f68ac7869d7ba3f3ed4e929f3a2fa376328b4658de4895345f04d14748be846dc9291eff85693398eacddd9d82678f42cee8b7258f9b17c443fdac9e6"
     },
     {
-      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#bfb6712c028fe03ac1488df7cba9a253fe3a1a5991541802a2a18d86fe2d8c3f",
+      "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e",
       "type": "X25519KeyAgreementKey2019",
       "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
-      "publicKeyHex": "bfb6712c028fe03ac1488df7cba9a253fe3a1a5991541802a2a18d86fe2d8c3f"
+      "publicKeyHex": "b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e"
     },
     {
       "id": "04dd3f39a5ab3d26a48d5275e824a440d81dd0095d00a22835a204f4a7f69d0ed74f7ec12c39dedaeefa24db3329534cf8b5eda7457cb7d23c2d22f1da4d74e169",
@@ -27,15 +27,17 @@
   ],
   "authentication": [
     "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#045e47622f68ac7869d7ba3f3ed4e929f3a2fa376328b4658de4895345f04d14748be846dc9291eff85693398eacddd9d82678f42cee8b7258f9b17c443fdac9e6",
-    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#bfb6712c028fe03ac1488df7cba9a253fe3a1a5991541802a2a18d86fe2d8c3f",
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e",
     "04dd3f39a5ab3d26a48d5275e824a440d81dd0095d00a22835a204f4a7f69d0ed74f7ec12c39dedaeefa24db3329534cf8b5eda7457cb7d23c2d22f1da4d74e169"
   ],
   "assertionMethod": [
     "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#045e47622f68ac7869d7ba3f3ed4e929f3a2fa376328b4658de4895345f04d14748be846dc9291eff85693398eacddd9d82678f42cee8b7258f9b17c443fdac9e6",
-    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#bfb6712c028fe03ac1488df7cba9a253fe3a1a5991541802a2a18d86fe2d8c3f",
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e",
     "04dd3f39a5ab3d26a48d5275e824a440d81dd0095d00a22835a204f4a7f69d0ed74f7ec12c39dedaeefa24db3329534cf8b5eda7457cb7d23c2d22f1da4d74e169"
   ],
-  "keyAgreement": [],
+  "keyAgreement": [
+    "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#b1ac42151ba38eeada57bf79ce007588abf61b3f86dcafeb8bc5e90f42f0227e"
+  ],
   "service": [
     {
       "id": "#messaging",

@@ -1,12 +1,12 @@
 #!/usr/bin/env ts-node
 /**
- * DIDComm HTTP/2 Transport Server
+ * DIDComm HTTP Transport Server
  *
  * This server provides HTTP endpoints for sending/receiving DIDComm messages
  * and integrates with Envoy Proxies.
  *
  * Architecture:
- * Veramo_NF_A ↔ HTTP Server ↔ Envoy_Proxy_NF_A ↔ Envoy_Gateway_A ↔ ... ↔ Veramo_NF_B
+ * Veramo_NF_A ↔ HTTP/1.1 ↔ Envoy_Proxy_NF_A ↔ HTTP/2+mTLS ↔ Envoy_Gateway_A ↔ ... ↔ Veramo_NF_B
  */
 import http from 'http';
 import { createAgent } from '@veramo/core';
@@ -19,12 +19,16 @@ import { KeyManagementSystem, SecretBox } from '@veramo/kms-local';
 import { WebDIDProvider } from '@veramo/did-provider-web';
 import { Resolver } from 'did-resolver';
 import { getResolver as webDidResolver } from 'web-did-resolver';
+import { DIDComm } from '@veramo/did-comm';
+import { MessageHandler } from '@veramo/message-handler';
 import { DataSource } from 'typeorm';
 import { Entities, migrations } from '@veramo/data-store';
 import { DIDCommVPWrapper } from './didcomm-vp-wrapper.js';
-import { DIDCOMM_MESSAGE_TYPES } from './didcomm-messages.js';
+import { DIDCOMM_MESSAGE_TYPES, createVPAuthRequest } from './didcomm-messages.js';
 import { PRESENTATION_DEFINITION_A, PRESENTATION_DEFINITION_B } from './presentation-definitions.js';
 import { SessionManager } from './session-manager.js';
+import { packDIDCommMessage, unpackDIDCommMessage, verifyEncryption } from './didcomm-encryption.js';
+import { precacheDIDs } from './did-resolver-cache.js';
 // Configuration from environment
 const DID = process.env.DID_NF_A || process.env.DID_NF_B || '';
 const DB_PATH = process.env.DB_PATH || './database.sqlite';
@@ -85,10 +89,16 @@ async function initializeAgent() {
             new CredentialPlugin(),
             new DataStore(dbConnection),
             new DataStoreORM(dbConnection),
+            new DIDComm(), // E2E Encryption support
+            new MessageHandler({
+                messageHandlers: [], // No additional handlers needed for now
+            }),
         ],
     });
     wrapper = new DIDCommVPWrapper(agent);
     sessionManager = new SessionManager();
+    // Pre-cache DID documents for E2E encryption
+    precacheDIDs();
     console.log('✅ Veramo Agent initialized');
     console.log('✅ Session Manager initialized');
 }
@@ -102,7 +112,9 @@ async function loadCredentials() {
                 { column: 'subject', value: [MY_DID] }
             ]
         });
+        console.log(`📥 Loaded ${credentials.length} credential(s) for ${MY_DID}`);
         const nfCredentials = credentials.filter((cred) => cred.verifiableCredential.type.includes('NetworkFunctionCredential'));
+        console.log(`   Found ${nfCredentials.length} NetworkFunctionCredential(s)`);
         return nfCredentials.map((cred) => cred.verifiableCredential);
     }
     catch (error) {
@@ -113,8 +125,19 @@ async function loadCredentials() {
 /**
  * Handle incoming DIDComm message
  */
-async function handleIncomingMessage(message) {
-    console.log(`\n📨 Received DIDComm message: ${message.type}`);
+async function handleIncomingMessage(messageOrEncrypted) {
+    // Check if message is encrypted
+    let message;
+    if (messageOrEncrypted.encrypted && messageOrEncrypted.message) {
+        // Decrypt E2E encrypted message
+        console.log(`\n📨 Received encrypted DIDComm message`);
+        message = await unpackDIDCommMessage(agent, messageOrEncrypted.message);
+    }
+    else {
+        // Plain message (backwards compatibility)
+        message = messageOrEncrypted;
+    }
+    console.log(`   Type: ${message.type}`);
     console.log(`   From: ${message.from}`);
     console.log(`   ID: ${message.id}`);
     const credentials = await loadCredentials();
@@ -181,16 +204,49 @@ async function handleIncomingMessage(message) {
     }
 }
 /**
- * Send DIDComm message via HTTP to Envoy Proxy
+ * Send DIDComm message via local Envoy Proxy
+ * The Envoy mesh will route it to the correct destination
  */
 async function sendDIDCommMessage(message, targetDid) {
-    const envoyProxyUrl = 'http://envoy-proxy-nf-a:8080/didcomm/send'; // Will be routed by Envoy
-    console.log(`\n📤 Sending DIDComm message to ${targetDid}`);
+    // Determine our local Envoy Proxy based on our DID
+    let localEnvoyProxy;
+    if (MY_DID.includes('cluster-a')) {
+        localEnvoyProxy = 'http://envoy-proxy-nf-a:8080';
+    }
+    else if (MY_DID.includes('cluster-b')) {
+        localEnvoyProxy = 'http://envoy-proxy-nf-b:8080';
+    }
+    else {
+        throw new Error(`Unknown local DID: ${MY_DID}`);
+    }
+    // Determine target cluster for routing
+    let targetCluster;
+    if (targetDid.includes('cluster-a')) {
+        targetCluster = 'cluster-a';
+    }
+    else if (targetDid.includes('cluster-b')) {
+        targetCluster = 'cluster-b';
+    }
+    else {
+        throw new Error(`Unknown target DID: ${targetDid}`);
+    }
+    console.log(`\n📤 Sending DIDComm message`);
+    console.log(`   From: ${MY_DID}`);
+    console.log(`   To: ${targetDid}`);
     console.log(`   Type: ${message.type}`);
     console.log(`   ID: ${message.id}`);
-    const payload = JSON.stringify(message);
+    console.log(`   Route: ${localEnvoyProxy} → Envoy Mesh → ${targetCluster}`);
+    // Encrypt message with recipient's public key (E2E encryption)
+    const encryptedMessage = await packDIDCommMessage(agent, message, targetDid, MY_DID);
+    // Verify encryption worked
+    verifyEncryption(encryptedMessage);
+    const payload = JSON.stringify({
+        encrypted: true,
+        message: encryptedMessage
+    });
+    console.log(`📦 Payload size: ${Buffer.byteLength(payload)} bytes (${(Buffer.byteLength(payload) / 1024).toFixed(2)} KB)`);
     return new Promise((resolve, reject) => {
-        const req = http.request(envoyProxyUrl, {
+        const req = http.request(localEnvoyProxy + '/didcomm/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -279,6 +335,43 @@ function createHTTPServer() {
                 }
                 catch (error) {
                     console.error('Error sending DIDComm message:', error);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: error.message }));
+                }
+            });
+            return;
+        }
+        // Initiate VP authentication flow (creates session on initiator side)
+        if (req.url === '/didcomm/initiate-auth' && req.method === 'POST') {
+            let body = '';
+            req.on('data', (chunk) => body += chunk);
+            req.on('end', async () => {
+                try {
+                    const { targetDid, presentationDefinition } = JSON.parse(body);
+                    console.log(`\n🚀 Initiating VP authentication flow`);
+                    console.log(`   Target: ${targetDid}`);
+                    console.log(`   Our DID: ${MY_DID}`);
+                    // Create session on initiator side
+                    const session = sessionManager.createSession(MY_DID, // Initiator
+                    targetDid, // Responder
+                    `challenge-${Date.now()}`);
+                    // Create VP_AUTH_REQUEST message
+                    const authRequest = createVPAuthRequest(MY_DID, targetDid, presentationDefinition || MY_PD, 'Please authenticate yourself for service access');
+                    // Mark that we sent the PD
+                    sessionManager.updateSession(session.sessionId, {
+                        initiatorPdSent: true
+                    });
+                    // Send the request
+                    await sendDIDCommMessage(authRequest, targetDid);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        sessionId: session.sessionId,
+                        messageId: authRequest.id
+                    }));
+                }
+                catch (error) {
+                    console.error('Error initiating auth:', error);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: error.message }));
                 }

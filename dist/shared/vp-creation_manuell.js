@@ -149,8 +149,17 @@ function matchesField(credential, field) {
             }
             if (field.filter.pattern) {
                 const regex = new RegExp(field.filter.pattern);
-                if (!regex.test(String(value))) {
-                    return false;
+                // Handle both string values and arrays (e.g., credential types)
+                if (Array.isArray(value)) {
+                    // For arrays, check if any element matches the pattern
+                    if (!value.some(v => regex.test(String(v)))) {
+                        return false;
+                    }
+                }
+                else {
+                    if (!regex.test(String(value))) {
+                        return false;
+                    }
                 }
             }
         }

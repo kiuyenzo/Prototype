@@ -9,7 +9,8 @@ export class SessionManager {
         this.sessions = new Map();
         this.sessionTimeout = sessionTimeoutMs;
         // Cleanup expired sessions every minute
-        setInterval(() => this.cleanupExpiredSessions(), 60000);
+        // TODO: Disabled due to segfault in Alpine Linux + Node.js + SQLite
+        // setInterval(() => this.cleanupExpiredSessions(), 60000);
     }
     /**
      * Create a new session for VP exchange

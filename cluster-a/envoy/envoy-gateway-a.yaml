@@ -46,17 +46,21 @@ static_resources:
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-                http2_protocol_options: {}  # Enable HTTP/2
+                http2_protocol_options:
+                  initial_stream_window_size: 268435456  # 256MB
+                  initial_connection_window_size: 268435456  # 256MB
+                  max_concurrent_streams: 100
           transport_socket:
             name: envoy.transport_sockets.tls
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+              require_client_certificate: true
               common_tls_context:
                 tls_certificates:
                   - certificate_chain:
-                      filename: /etc/envoy/certs/server-cert.pem
+                      filename: /etc/envoy/certs/gateway-server-cert.pem
                     private_key:
-                      filename: /etc/envoy/certs/server-key.pem
+                      filename: /etc/envoy/certs/gateway-server-key.pem
                 validation_context:
                   trusted_ca:
                     filename: /etc/envoy/certs/ca-cert.pem
@@ -94,7 +98,10 @@ static_resources:
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-                http2_protocol_options: {}  # Enable HTTP/2
+                http2_protocol_options:
+                  initial_stream_window_size: 268435456  # 256MB
+                  initial_connection_window_size: 268435456  # 256MB
+                  max_concurrent_streams: 100
           transport_socket:
             name: envoy.transport_sockets.tls
             typed_config:
@@ -128,7 +135,14 @@ static_resources:
                     socket_address:
                       address: envoy-proxy-nf-a
                       port_value: 8081
-      http2_protocol_options: {}  # Enable HTTP/2
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options:
+              initial_stream_window_size: 268435456  # 256MB
+              initial_connection_window_size: 268435456  # 256MB
+              max_concurrent_streams: 100
 
     # Envoy Gateway B (remote cluster)
     - name: envoy_gateway_b
@@ -161,7 +175,14 @@ static_resources:
                 - san_type: DNS
                   matcher:
                     exact: "envoy-gateway-b"
-      http2_protocol_options: {}  # Enable HTTP/2
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options:
+              initial_stream_window_size: 268435456  # 256MB
+              initial_connection_window_size: 268435456  # 256MB
+              max_concurrent_streams: 100
 
 # Logging
 layered_runtime:

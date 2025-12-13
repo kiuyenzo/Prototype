@@ -321,6 +321,8 @@ async function sendDIDCommMessage(message: DIDCommVPMessage, targetDid: string):
     message: encryptedMessage
   });
 
+  console.log(`📦 Payload size: ${Buffer.byteLength(payload)} bytes (${(Buffer.byteLength(payload) / 1024).toFixed(2)} KB)`);
+
   return new Promise((resolve, reject) => {
     const req = http.request(localEnvoyProxy + '/didcomm/send', {
       method: 'POST',
