@@ -5,7 +5,10 @@
       "Bash(kubectl get:*)",
       "Bash(docker exec:*)",
       "Bash(kubectl exec:*)",
-      "Bash(node /Users/tanja/Desktop/Prototype/shared/test-envoy-e2e.js:*)"
+      "Bash(node /Users/tanja/Desktop/Prototype/shared/test-envoy-e2e.js:*)",
+      "Bash(kubectl delete:*)",
+      "Bash(kubectl apply:*)",
+      "Bash(docker build:*)"
     ],
     "deny": [],
     "ask": []

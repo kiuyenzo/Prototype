@@ -1,5 +1,4 @@
 #!/usr/bin/env ts-node
-"use strict";
 /**
  * Local DID Document Cache for Testing
  *
@@ -11,45 +10,33 @@
  * - Local DID registry
  * - Cached DID documents from previous resolutions
  */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolveDIDDocument = resolveDIDDocument;
-exports.extractEncryptionKey = extractEncryptionKey;
-exports.getRecipientPublicKey = getRecipientPublicKey;
-exports.precacheDIDs = precacheDIDs;
-exports.clearCache = clearCache;
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
+import * as fs from 'fs';
 /**
  * Cache for resolved DID documents
  */
 const didDocumentCache = new Map();
 /**
- * Known DID document file paths
+ * Known DID document file paths (absolute paths from container root)
  */
 const DID_PATHS = {
-    'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a': '../cluster-a/did-nf-a/did.json',
-    'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b': '../cluster-b/did-nf-b/did.json',
+    'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a': '/app/prototype/cluster-a/did-nf-a/did.json',
+    'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b': '/app/prototype/cluster-b/did-nf-b/did.json',
 };
 /**
  * Load a DID document from local filesystem
  */
 function loadLocalDIDDocument(did) {
     try {
-        const relativePath = DID_PATHS[did];
-        if (!relativePath) {
+        const filePath = DID_PATHS[did];
+        if (!filePath) {
             console.log(`⚠️  No local DID document path for ${did}`);
             return null;
         }
-        // Resolve path relative to this file
-        const fullPath = path_1.default.resolve(__dirname, relativePath);
-        if (!fs_1.default.existsSync(fullPath)) {
-            console.log(`⚠️  DID document not found at ${fullPath}`);
+        if (!fs.existsSync(filePath)) {
+            console.log(`⚠️  DID document not found at ${filePath}`);
             return null;
         }
-        const content = fs_1.default.readFileSync(fullPath, 'utf-8');
+        const content = fs.readFileSync(filePath, 'utf-8');
         const didDocument = JSON.parse(content);
         console.log(`✅ Loaded local DID document for ${did}`);
         return didDocument;
@@ -66,7 +53,7 @@ function loadLocalDIDDocument(did) {
  * @param agent - Veramo agent (optional, for fallback resolution)
  * @returns DID document or null
  */
-async function resolveDIDDocument(did, agent) {
+export async function resolveDIDDocument(did, agent) {
     // Check cache first
     if (didDocumentCache.has(did)) {
         console.log(`📦 Using cached DID document for ${did}`);
@@ -101,7 +88,7 @@ async function resolveDIDDocument(did, agent) {
  * @param didDocument - DID document
  * @returns Public key for encryption or null
  */
-function extractEncryptionKey(didDocument) {
+export function extractEncryptionKey(didDocument) {
     if (!didDocument || !didDocument.verificationMethod) {
         return null;
     }
@@ -127,7 +114,7 @@ function extractEncryptionKey(didDocument) {
  * @param agent - Veramo agent
  * @returns Public key or null
  */
-async function getRecipientPublicKey(recipientDid, agent) {
+export async function getRecipientPublicKey(recipientDid, agent) {
     const didDocument = await resolveDIDDocument(recipientDid, agent);
     if (!didDocument) {
         return null;
@@ -137,7 +124,7 @@ async function getRecipientPublicKey(recipientDid, agent) {
 /**
  * Pre-cache known DIDs for faster access
  */
-function precacheDIDs() {
+export function precacheDIDs() {
     console.log('📦 Pre-caching known DIDs...');
     for (const did of Object.keys(DID_PATHS)) {
         const doc = loadLocalDIDDocument(did);
@@ -150,7 +137,7 @@ function precacheDIDs() {
 /**
  * Clear DID cache
  */
-function clearCache() {
+export function clearCache() {
     didDocumentCache.clear();
     console.log('🗑️  DID cache cleared');
 }

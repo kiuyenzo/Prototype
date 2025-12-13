@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Script to sync DID document from did.json file to Veramo database

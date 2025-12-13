@@ -18,4 +18,4 @@ spec:
     - destination:
         host: veramo-nf-a.nf-a-namespace.svc.cluster.local
         port:
-          number: 7001
+          number: 3000

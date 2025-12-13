@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nf-a-namespace
+  labels:
+    istio-injection: enabled
+    name: nf-a-namespace

@@ -6,14 +6,16 @@ metadata:
   namespace: nf-a-namespace
 spec:
   hosts:
-  - nf-b.cluster-b.global
+  - veramo-nf-b.nf-b-namespace.svc.cluster.local
+  addresses:
+  - 240.240.0.2
   ports:
-  - number: 80
-    name: http
+  - number: 3001
+    name: http-veramo
     protocol: HTTP
-  location: MESH_EXTERNAL
+  location: MESH_INTERNAL
   resolution: STATIC
   endpoints:
-  - address: 172.23.0.3  # Cluster B IP
-    ports:
-      http: 30296  # Cluster B NodePort
+  - address: 10.96.169.20  # Cluster B East-West Gateway
+    labels:
+      cluster: cluster-b

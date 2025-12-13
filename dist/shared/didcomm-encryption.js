@@ -1,5 +1,4 @@
 #!/usr/bin/env ts-node
-"use strict";
 /**
  * DIDComm End-to-End Encryption Module
  *
@@ -15,12 +14,7 @@
  * NF-A encrypts → Proxy-A (sees only JWE) → Gateway-A (mTLS) →
  * Gateway-B (mTLS) → Proxy-B (sees only JWE) → NF-B decrypts
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.packDIDCommMessage = packDIDCommMessage;
-exports.unpackDIDCommMessage = unpackDIDCommMessage;
-exports.isEncryptedMessage = isEncryptedMessage;
-exports.verifyEncryption = verifyEncryption;
-const did_resolver_cache_js_1 = require("./did-resolver-cache.js");
+import { getRecipientPublicKey } from './did-resolver-cache.js';
 /**
  * Pack (encrypt) a DIDComm message for a specific recipient
  *
@@ -30,11 +24,11 @@ const did_resolver_cache_js_1 = require("./did-resolver-cache.js");
  * @param senderDid - DID of the sender (required for authcrypt)
  * @returns Encrypted JWE message as string
  */
-async function packDIDCommMessage(agent, message, recipientDid, senderDid) {
+export async function packDIDCommMessage(agent, message, recipientDid, senderDid) {
     console.log(`\n🔒 Encrypting DIDComm message for ${recipientDid}`);
     try {
         // First try: Use local DID resolution cache
-        const recipientKey = await (0, did_resolver_cache_js_1.getRecipientPublicKey)(recipientDid, agent);
+        const recipientKey = await getRecipientPublicKey(recipientDid, agent);
         if (!recipientKey) {
             throw new Error(`Could not resolve recipient DID: ${recipientDid}`);
         }
@@ -51,7 +45,7 @@ async function packDIDCommMessage(agent, message, recipientDid, senderDid) {
         console.log(`   From: ${messageWithFrom.from}`);
         // Pack the message using Veramo's DIDComm plugin
         // This creates a JWE (JSON Web Encryption) envelope
-        // Note: authcrypt has sender key mapping issues - using anoncrypt for now
+        // Using anoncrypt (recipient-only) due to Veramo authcrypt instability
         const packedMessage = await agent.packDIDCommMessage({
             packing: 'anoncrypt', // Anonymous encryption (recipient only)
             message: messageWithFrom,
@@ -73,7 +67,7 @@ async function packDIDCommMessage(agent, message, recipientDid, senderDid) {
  * @param packedMessage - Encrypted JWE message string
  * @returns Decrypted message object
  */
-async function unpackDIDCommMessage(agent, packedMessage) {
+export async function unpackDIDCommMessage(agent, packedMessage) {
     console.log(`\n🔓 Decrypting received DIDComm message`);
     try {
         // Unpack the JWE message
@@ -93,7 +87,7 @@ async function unpackDIDCommMessage(agent, packedMessage) {
 /**
  * Check if a message is encrypted (JWE format)
  */
-function isEncryptedMessage(message) {
+export function isEncryptedMessage(message) {
     if (typeof message !== 'string') {
         return false;
     }
@@ -109,7 +103,7 @@ function isEncryptedMessage(message) {
 /**
  * Verify E2E encryption is working by checking message format
  */
-function verifyEncryption(packedMessage) {
+export function verifyEncryption(packedMessage) {
     try {
         const jwe = JSON.parse(packedMessage);
         if (!jwe.protected || !jwe.ciphertext) {

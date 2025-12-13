@@ -61,8 +61,9 @@ export async function packDIDCommMessage(
 
     // Pack the message using Veramo's DIDComm plugin
     // This creates a JWE (JSON Web Encryption) envelope
+    // Using anoncrypt (recipient-only) due to Veramo authcrypt instability
     const packedMessage = await agent.packDIDCommMessage({
-      packing: 'authcrypt', // Authenticated encryption (sender authenticated + encrypted)
+      packing: 'anoncrypt', // Anonymous encryption (recipient only)
       message: messageWithFrom,
     });
 

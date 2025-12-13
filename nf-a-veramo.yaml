@@ -183,6 +183,9 @@ spec:
     metadata:
       labels:
         app: nf-a
+      annotations:
+        sidecar.istio.io/inject: "true"
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "172.23.0.2/32,172.23.0.3/32"
     spec:
       volumes:
         - name: veramo-config-volume
@@ -207,34 +210,49 @@ spec:
                   key: DIDCOMM_PACKING_MODE
 
         - name: veramo-nf-a
-          image: veramolabs/veramo-agent:latest
+          image: veramo-nf:phase5
+          imagePullPolicy: Never
+          workingDir: /app
           ports:
-            - containerPort: 7001
+            - containerPort: 3000
               name: http
           volumeMounts:
-            - name: veramo-config-volume
-              mountPath: /app/agent.yml
-              subPath: agent.yml
             - name: veramo-data
-              mountPath: /data
+              mountPath: /app/cluster-a
+          command:
+            - sh
+            - -c
+            - |
+              npm rebuild sqlite3 &&
+              PORT=3000 node shared/didcomm-http-server.js
           env:
             - name: DIDCOMM_PACKING_MODE
               valueFrom:
                 configMapKeyRef:
                   name: veramo-config
                   key: DIDCOMM_PACKING_MODE
+            - name: DID_NF_A
+              value: "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
+            - name: DB_PATH
+              value: "/app/cluster-a/database-nf-a.sqlite"
+            - name: DB_ENCRYPTION_KEY
+              value: "ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6"
+            - name: USE_KUBERNETES
+              value: "true"
           livenessProbe:
             httpGet:
-              path: /
-              port: 7001
-            initialDelaySeconds: 30
-            periodSeconds: 10
+              path: /health
+              port: 3000
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            failureThreshold: 5
           readinessProbe:
             httpGet:
-              path: /
-              port: 7001
-            initialDelaySeconds: 10
-            periodSeconds: 5
+              path: /health
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -246,5 +264,5 @@ spec:
     app: nf-a
   ports:
     - name: http-veramo
-      port: 7001
-      targetPort: 7001
+      port: 3000
+      targetPort: 3000

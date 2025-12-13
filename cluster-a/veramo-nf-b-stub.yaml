@@ -1,0 +1,12 @@
+# Stub Service für NF-B in Cluster A (für DNS resolution)
+apiVersion: v1
+kind: Service
+metadata:
+  name: veramo-nf-b
+  namespace: nf-b-namespace
+spec:
+  ports:
+  - port: 3001
+    name: http
+    protocol: TCP
+  # Kein selector - wird von ServiceEntry übernommen

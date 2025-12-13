@@ -282,15 +282,42 @@ async function handleIncomingMessage(messageOrEncrypted: any): Promise<DIDCommVP
  * The Envoy mesh will route it to the correct destination
  */
 async function sendDIDCommMessage(message: DIDCommVPMessage, targetDid: string): Promise<void> {
-  // Determine our local Envoy Proxy based on our DID
+  // Determine routing endpoint (Envoy for Docker, Kubernetes Service for K8s)
+  const USE_KUBERNETES = process.env.USE_KUBERNETES === 'true';
   let localEnvoyProxy: string;
 
-  if (MY_DID.includes('cluster-a')) {
-    localEnvoyProxy = 'http://envoy-proxy-nf-a:8080';
-  } else if (MY_DID.includes('cluster-b')) {
-    localEnvoyProxy = 'http://envoy-proxy-nf-b:8080';
+  if (USE_KUBERNETES) {
+    // Kubernetes multi-cluster routing: use NodePort for cross-cluster, ClusterIP for local
+    const isTargetClusterA = targetDid.includes('cluster-a');
+    const isLocalClusterA = MY_DID.includes('cluster-a');
+
+    // Check if this is cross-cluster communication
+    if (isTargetClusterA !== isLocalClusterA) {
+      // Cross-cluster: use NodePort on Docker network
+      if (isTargetClusterA) {
+        localEnvoyProxy = 'http://172.23.0.2:31829';  // Cluster-A NodePort
+      } else {
+        localEnvoyProxy = 'http://172.23.0.3:30132';  // Cluster-B NodePort
+      }
+    } else {
+      // Same cluster: use Kubernetes ClusterIP service
+      if (targetDid.includes('cluster-a')) {
+        localEnvoyProxy = 'http://veramo-nf-a.nf-a-namespace.svc.cluster.local:3000';
+      } else if (targetDid.includes('cluster-b')) {
+        localEnvoyProxy = 'http://veramo-nf-b.nf-b-namespace.svc.cluster.local:3001';
+      } else {
+        throw new Error(`Unknown target DID: ${targetDid}`);
+      }
+    }
   } else {
-    throw new Error(`Unknown local DID: ${MY_DID}`);
+    // Docker/Envoy routing: via local Envoy proxy
+    if (MY_DID.includes('cluster-a')) {
+      localEnvoyProxy = 'http://envoy-proxy-nf-a:8080';
+    } else if (MY_DID.includes('cluster-b')) {
+      localEnvoyProxy = 'http://envoy-proxy-nf-b:8080';
+    } else {
+      throw new Error(`Unknown local DID: ${MY_DID}`);
+    }
   }
 
   // Determine target cluster for routing
