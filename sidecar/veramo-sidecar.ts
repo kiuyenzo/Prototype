@@ -33,7 +33,7 @@
  */
 
 import http from 'http';
-import { createAgent, IResolver, IDataStore, IKeyManager, IDIDManager } from '@veramo/core';
+import { createAgent, IResolver, IKeyManager, IDIDManager } from '@veramo/core';
 import { DIDResolverPlugin } from '@veramo/did-resolver';
 import { CredentialPlugin } from '@veramo/credential-w3c';
 import { KeyManager } from '@veramo/key-manager';
@@ -59,7 +59,6 @@ import {
 import { PRESENTATION_DEFINITION_A, PRESENTATION_DEFINITION_B } from './src/presentation-definitions.js';
 import { SessionManager } from './src/session-manager.js';
 import { packDIDCommMessage, unpackDIDCommMessage, verifyEncryption } from './src/didcomm-encryption.js';
-import { createLocalResolver } from './src/local-did-resolver.js';
 
 // Configuration
 const DB_PATH = process.env.DB_PATH || './database.sqlite';
@@ -122,8 +121,7 @@ async function initializeAgent(): Promise<void> {
         },
       }),
       new DIDResolverPlugin({
-        // Use local resolver first, then fall back to web resolver
-        resolver: new Resolver({ ...createLocalResolver(webDidResolver()) }),
+        resolver: new Resolver({ ...webDidResolver() }),
       }),
       new CredentialPlugin(),
       new DataStore(dbConnection),

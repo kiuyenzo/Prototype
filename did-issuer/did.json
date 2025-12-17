@@ -9,7 +9,7 @@
       "id": "did:web:kiuyenzo.github.io:Prototype:did-issuer#key-1",
       "type": "EcdsaSecp256k1VerificationKey2019",
       "controller": "did:web:kiuyenzo.github.io:Prototype:did-issuer",
-      "publicKeyHex": "04f9dc25d9dfb54d064af6aa8c9f63cc60ba592dc20ed7963c31a85f24cc50eb7066b1afac329acf54ecd8a5459ea12e7ddeca896ff00027cea71539c9281fb860"
+      "publicKeyHex": "045c1ddb7ff3bbc12b92a612f787e047e61cdcdf2da643499df167a4e75bf4ee074e1800fcc451e52cfb913892277218677094cc989510b6e478d11dbae6154e0b"
     }
   ],
   "assertionMethod": [

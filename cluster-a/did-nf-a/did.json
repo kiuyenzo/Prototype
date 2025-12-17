@@ -10,13 +10,13 @@
             "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-1",
             "type": "EcdsaSecp256k1VerificationKey2019",
             "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
-            "publicKeyHex": "04c6865fc59468fd51ac0718dd5ec926662666d5ff6f75e961bc60c94b3d374e5ada4ee7ceb5903f7fa1480873d6fb5fcc12f204fc946c0718557f925ba6e4202d"
+            "publicKeyHex": "042ac10aa2be6b0e903bed2886ac45fccccfd95a87f52a84de55156b142809df4d943435eabf5e13480767b55c4e5d43d874dff20c6271b928430cb9a939bc247f"
         },
         {
             "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-2",
             "type": "X25519KeyAgreementKey2019",
             "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
-            "publicKeyHex": "53527a2827537cd4e48af3dda485cb082eb2e32788ed87c5b471e38924c70521"
+            "publicKeyHex": "0edd35c82d30913dba7229322d45fff1c148840d65cfb629467be4d3fbf8d31a"
         }
     ],
     "authentication": [

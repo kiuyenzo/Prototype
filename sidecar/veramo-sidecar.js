@@ -57,7 +57,6 @@ const didcomm_messages_js_1 = require("./src/didcomm-messages.js");
 const presentation_definitions_js_1 = require("./src/presentation-definitions.js");
 const session_manager_js_1 = require("./src/session-manager.js");
 const didcomm_encryption_js_1 = require("./src/didcomm-encryption.js");
-const local_did_resolver_js_1 = require("./src/local-did-resolver.js");
 // Configuration
 const DB_PATH = process.env.DB_PATH || './database.sqlite';
 const DB_ENCRYPTION_KEY = process.env.DB_ENCRYPTION_KEY || '';
@@ -110,8 +109,7 @@ async function initializeAgent() {
                 },
             }),
             new did_resolver_1.DIDResolverPlugin({
-                // Use local resolver first, then fall back to web resolver
-                resolver: new did_resolver_2.Resolver({ ...(0, local_did_resolver_js_1.createLocalResolver)((0, web_did_resolver_1.getResolver)()) }),
+                resolver: new did_resolver_2.Resolver({ ...(0, web_did_resolver_1.getResolver)() }),
             }),
             new credential_w3c_1.CredentialPlugin(),
             new data_store_1.DataStore(dbConnection),

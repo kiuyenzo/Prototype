@@ -33,7 +33,9 @@
       "Bash(kubectl --context kind-cluster-a apply -f /Users/tanja/Downloads/Prototype-main/cluster-a/stub-service-nf-b.yaml)",
       "Bash(kubectl --context kind-cluster-b apply -f /Users/tanja/Downloads/Prototype-main/cluster-b/stub-service-nf-a.yaml)",
       "Bash(kubectl --context kind-cluster-a exec:*)",
-      "Bash(kubectl:*)"
+      "Bash(kubectl:*)",
+      "Bash(docker system:*)",
+      "Bash(node scripts/generate-keys.mjs:*)"
     ]
   }
 }
