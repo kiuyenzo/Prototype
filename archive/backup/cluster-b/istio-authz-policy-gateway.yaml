@@ -1,0 +1,18 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: veramo-nf-b-gateway-policy
+  namespace: nf-b-namespace
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: nf-b
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+    to:
+    - operation:
+        methods: ["POST", "GET"]
+        paths: ["/messaging*"]

@@ -1,0 +1,21 @@
+# Expose Services aus cluster-a über East-West Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: expose-veramo-nf-a
+  namespace: nf-a-namespace
+spec:
+  hosts:
+    - veramo-nf-a.nf-a-namespace.svc.cluster.local
+  gateways:
+    - nf-a-eastwest
+  tls:
+    - match:
+        - port: 15443
+          sniHosts:
+            - veramo-nf-a.nf-a-namespace.svc.cluster.local
+      route:
+        - destination:
+            host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+            port:
+              number: 3000

@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-eastwestgateway
+  namespace: istio-system
+  labels:
+    app: istio-eastwestgateway
+    istio: eastwestgateway
+spec:
+  type: LoadBalancer
+  selector:
+    app: istio-eastwestgateway
+    istio: eastwestgateway
+  ports:
+    - name: status-port
+      port: 15021
+      targetPort: 15021
+      protocol: TCP
+    - name: tls
+      port: 15443
+      targetPort: 15443
+      protocol: TCP
+    - name: tls-istiod
+      port: 15012
+      targetPort: 15012
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-eastwestgateway
+  namespace: istio-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: istio-eastwestgateway
+      istio: eastwestgateway
+  template:
+    metadata:
+      labels:
+        app: istio-eastwestgateway
+        istio: eastwestgateway
+        sidecar.istio.io/inject: "false"
+      annotations:
+        inject.istio.io/templates: gateway
+    spec:
+      serviceAccountName: istio-eastwestgateway-service-account
+      containers:
+        - name: istio-proxy
+          image: docker.io/istio/proxyv2:1.27.3
+          env:
+            - name: ISTIO_META_REQUESTED_NETWORK_VIEW
+              value: network-cluster-a
+          ports:
+            - containerPort: 15021
+              protocol: TCP
+            - containerPort: 15443
+              protocol: TCP
+            - containerPort: 15012
+              protocol: TCP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-eastwestgateway-service-account
+  namespace: istio-system
+  labels:
+    app: istio-eastwestgateway
+    istio: eastwestgateway
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: istio-eastwestgateway
+  namespace: istio-system
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: istio-eastwestgateway
+  namespace: istio-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: istio-eastwestgateway
+subjects:
+  - kind: ServiceAccount
+    name: istio-eastwestgateway-service-account

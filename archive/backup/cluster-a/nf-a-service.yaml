@@ -1,0 +1,13 @@
+# Service for NF-A App in Cluster A
+apiVersion: v1
+kind: Service
+metadata:
+  name: nf-a-service
+  namespace: nf-a-namespace
+spec:
+  selector:
+    app: nf-a
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

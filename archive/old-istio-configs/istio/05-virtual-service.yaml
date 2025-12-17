@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: veramo-nf-a-vs
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - nf-a-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /didcomm
+    - uri:
+        prefix: /health
+    - uri:
+        prefix: /messaging
+    route:
+    - destination:
+        host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+        port:
+          number: 3000

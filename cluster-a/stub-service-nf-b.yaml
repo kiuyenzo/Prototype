@@ -1,0 +1,33 @@
+# Stub Service: Provides DNS resolution for veramo-nf-b in cluster-a
+# This allows applications to resolve the cross-cluster hostname
+# The actual routing is handled by the ServiceEntry
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nf-b-namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veramo-nf-b
+  namespace: nf-b-namespace
+spec:
+  clusterIP: None  # Headless service - DNS only
+  ports:
+  - port: 3001
+    name: http-veramo
+    targetPort: 3001
+---
+# Manual Endpoints to provide DNS resolution pointing to Cluster-B gateway
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: veramo-nf-b
+  namespace: nf-b-namespace
+subsets:
+- addresses:
+  - ip: 172.23.0.2  # Cluster-B control-plane IP
+  ports:
+  - port: 31696    # Cluster-B Ingress Gateway NodePort
+    name: http-veramo

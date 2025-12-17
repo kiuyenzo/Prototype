@@ -1,0 +1,80 @@
+
+shortcuts
+alias delete='k3d cluster delete cluster-a cluster-b'
+alias start='k3d cluster start cluster-a cluster-b'
+alias stop='k3d cluster stop cluster-a cluster-b'
+
+switch cluster
+kubectl config get-contexts
+kubectl config use-context kind-cluster-b
+
+
+# Unbenutzte Images in cluster-a entfernen
+docker exec cluster-a-control-plane crictl rmi --prune
+docker exec cluster-b-control-plane crictl rmi --prune
+
+# Dangling Images löschen (alte Builds ohne Tag)
+docker image prune -f
+
+# Build Cache löschen
+docker builder prune -f
+
+# Alles zusammen (sicher):
+docker system prune -f
+
+# Sessions löschen durch Pod-Restart
+kubectl rollout restart deployment/nf-a -n nf-a-namespace --context kind-cluster-a
+kubectl rollout restart deployment/nf-b -n nf-b-namespace --context kind-cluster-b
+
+basics
+k3d cluster list
+kubectl get pod  # -o wide für IP #serivces - list resources # -n acapy
+	kubectl get pods -n proxy
+	kubectl get pods -A -o wide --field-selector spec.nodeName=k3d-cluster-a-agent-0
+kubectl get nodes
+kubectl describe #** 
+kubectl logs {pod-name}
+kubectl exec {pod-name} 
+kubectl get ns
+kubectl get all --all-namespaces
+
+kubectl -n proxy get svc envoy-a
+kubectl get events 
+kubectl get services
+	kubectl get svc -n acapy
+kubectl get deployments #-n acapy
+kubectl exec -it {pod-name} -- bin/bash
+kubectl config view
+kubectl get all -A -o wide   
+
+suche nach Dateien
+find cluster-a -name "*.yaml"
+
+
+# alle container zeigen
+kubectl --context k3d-cluster-a get pods --all-namespaces -o json | \
+jq -r '.items[] | 
+  "Pod: \(.metadata.namespace)/\(.metadata.name)\n" +
+  "  Init Containers: \(if .spec.initContainers then [.spec.initContainers[].name] | join(", ") else "none" end)\n" +
+  "  Containers: \([.spec.containers[].name] | join(", "))\n"'
+
+# Outputs Beispiele
+
+kubectl get nodes -o wide
+NAME                     STATUS   ROLES                  AGE   VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE           KERNEL-VERSION     CONTAINER-RUNTIME
+k3d-cluster-a-agent-0    Ready    <none>                 26h   v1.31.5+k3s1   172.18.0.4    <none>        K3s v1.31.5+k3s1   6.10.14-linuxkit   containerd://1.7.23-k3s2
+k3d-cluster-a-server-0   Ready    control-plane,master   26h   v1.31.5+k3s1   172.18.0.3    <none>        K3s v1.31.5+k3s1   6.10.14-linuxkit   containerd://1.7.23-k3s2
+
+kcb -n proxy get svc envoy-b -o wide
+NAME      TYPE           CLUSTER-IP     EXTERNAL-IP             PORT(S)                           AGE   SELECTOR
+envoy-b   LoadBalancer   10.43.255.89   172.18.0.7,172.18.0.8   11443:32224/TCP,11444:30469/TCP   22h   app=envoy-b
+
+# # 2. Zeige Pod-Status
+# kubectl --context k3d-cluster-a -n proxy get pods -l app=envoy-a
+
+# # 3. Zeige Pod-Logs
+# kubectl --context k3d-cluster-a -n proxy logs -l app=envoy-a --tail=50
+
+# # 4. Zeige Events
+# kubectl --context k3d-cluster-a -n proxy get events --sort-by='.lastTimestamp' | tail -20
+

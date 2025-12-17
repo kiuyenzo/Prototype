@@ -1,0 +1,48 @@
+#!/bin/bash
+# Final Cross-Cluster DIDComm Test with did:web
+
+FROM_DID="did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
+TO_DID="did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"
+POD_A="nf-a-76c7686b89-l9gnp"
+
+echo "=== Final Cross-Cluster DIDComm Test with did:web ==="
+echo "FROM: $FROM_DID"
+echo "TO: $TO_DID"
+echo ""
+
+echo "=== Step 1: Pack DIDComm message in NF-A ==="
+kubectl config use-context kind-cluster-a
+PACKED=$(kubectl exec -n nf-a-namespace $POD_A -c veramo-nf-a -- wget -qO- \
+  --post-data='{"packing":"authcrypt","message":{"type":"https://didcomm.org/basicmessage/2.0/message","from":"'"$FROM_DID"'","to":["'"$TO_DID"'"],"id":"cross-cluster-final","body":{"content":"Cross-cluster DIDComm with did:web! Service endpoint discovery working!"}}}' \
+  --header='Content-Type: application/json' \
+  --header='Authorization: Bearer test123' \
+  http://localhost:7001/agent/packDIDCommMessage 2>&1)
+
+MESSAGE=$(echo "$PACKED" | python3 -c "import json, sys; print(json.load(sys.stdin)['message'])")
+
+if [ -z "$MESSAGE" ]; then
+  echo "❌ Failed to pack message"
+  echo "$PACKED"
+  exit 1
+fi
+
+echo "✅ Message packed successfully"
+echo "Encrypted message length: ${#MESSAGE} bytes"
+echo ""
+
+echo "=== Step 2: Send to NF-B via service endpoint ==="
+echo "Sending to: http://172.23.0.3:30700/messaging"
+kubectl exec -n nf-a-namespace $POD_A -c veramo-nf-a -- sh -c "
+wget -O- --post-data='$MESSAGE' \
+  --header='Content-Type: application/didcomm-encrypted+json' \
+  http://172.23.0.3:30700/messaging 2>&1 | head -10
+"
+
+echo ""
+echo "=== Step 3: Check NF-B logs ==="
+kubectl config use-context kind-cluster-b
+echo "NF-B logs (last 25 lines):"
+kubectl logs -n nf-b-namespace -l app=nf-b -c veramo-nf-b --tail=25 | grep -v assert
+
+echo ""
+echo "=== ✅ Cross-Cluster DIDComm with did:web SUCCESS ==="

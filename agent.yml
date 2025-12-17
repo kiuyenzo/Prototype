@@ -1,0 +1,191 @@
+version: 3.0
+
+constants:
+  baseUrl: http://localhost:3332
+  port: 3332
+  # Encryption key from cluster-a deployment
+  dbEncryptionKey: ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6
+  databaseFile: ./cluster-a/database-nf-a.sqlite
+  methods:
+    - keyManagerGetKeyManagementSystems
+    - keyManagerCreate
+    - keyManagerGet
+    - keyManagerDelete
+    - keyManagerImport
+    - keyManagerEncryptJWE
+    - keyManagerDecryptJWE
+    - keyManagerSign
+    - keyManagerSharedSecret
+    - keyManagerSignJWT
+    - keyManagerSignEthTX
+    - didManagerGetProviders
+    - didManagerFind
+    - didManagerGet
+    - didManagerGetByAlias
+    - didManagerCreate
+    - didManagerGetOrCreate
+    - didManagerImport
+    - didManagerDelete
+    - didManagerAddKey
+    - didManagerRemoveKey
+    - didManagerAddService
+    - didManagerRemoveService
+    - resolveDid
+    - getDIDComponentById
+    - discoverDid
+    - dataStoreGetMessage
+    - dataStoreSaveMessage
+    - dataStoreGetVerifiableCredential
+    - dataStoreSaveVerifiableCredential
+    - dataStoreGetVerifiablePresentation
+    - dataStoreSaveVerifiablePresentation
+    - dataStoreORMGetIdentifiers
+    - dataStoreORMGetIdentifiersCount
+    - dataStoreORMGetMessages
+    - dataStoreORMGetMessagesCount
+    - dataStoreORMGetVerifiableCredentialsByClaims
+    - dataStoreORMGetVerifiableCredentialsByClaimsCount
+    - dataStoreORMGetVerifiableCredentials
+    - dataStoreORMGetVerifiableCredentialsCount
+    - dataStoreORMGetVerifiablePresentations
+    - dataStoreORMGetVerifiablePresentationsCount
+    - handleMessage
+    - packDIDCommMessage
+    - unpackDIDCommMessage
+    - sendDIDCommMessage
+    - createVerifiableCredential
+    - createVerifiablePresentation
+    - verifyCredential
+    - verifyPresentation
+
+# Database connection
+dbConnection:
+  $require: typeorm#DataSource
+  $args:
+    - type: sqlite
+      database:
+        $ref: /constants/databaseFile
+      synchronize: false
+      migrationsRun: true
+      migrations:
+        $require: '@veramo/data-store?t=object#migrations'
+      logging: false
+      entities:
+        $require: '@veramo/data-store?t=object#Entities'
+
+# Server configuration
+server:
+  baseUrl:
+    $ref: /constants/baseUrl
+  port:
+    $ref: /constants/port
+  use:
+    # CORS
+    - - $require: 'cors?t=function#default'
+
+    # Add agent to the request object
+    - - $require: '@veramo/remote-server?t=function#RequestWithAgentRouter'
+        $args:
+          - agent:
+              $ref: /agent
+
+    # API base path
+    - - /agent
+      - $require: '@veramo/remote-server?t=function#apiKeyAuth'
+        $args:
+          - apiKey: test123
+      - $require: '@veramo/remote-server?t=function#AgentRouter'
+        $args:
+          - exposedMethods:
+              $ref: /constants/methods
+
+    # Open API schema
+    - - /open-api.json
+      - $require: '@veramo/remote-server?t=function#ApiSchemaRouter'
+        $args:
+          - basePath: :3332/agent
+            securityScheme: bearer
+            apiName: Agent
+            apiVersion: '1.0.0'
+            exposedMethods:
+              $ref: /constants/methods
+
+    # Swagger docs
+    - - /api-docs
+      - $require: swagger-ui-express?t=object#serve
+      - $require: swagger-ui-express?t=function#setup
+        $args:
+          - null
+          - swaggerOptions:
+              url: '/open-api.json'
+
+# DID resolvers
+didResolver:
+  $require: '@veramo/did-resolver#DIDResolverPlugin'
+  $args:
+    - web:
+        $ref: /web-did-resolver
+      key:
+        $ref: /did-key-resolver
+
+web-did-resolver:
+  $require: web-did-resolver?t=function&p=/web#getResolver
+
+did-key-resolver:
+  $require: '@veramo/did-provider-key?t=function&p=/key#getDidKeyResolver'
+
+# Key Manager
+keyManager:
+  $require: '@veramo/key-manager#KeyManager'
+  $args:
+    - store:
+        $require: '@veramo/data-store#KeyStore'
+        $args:
+          - $ref: /dbConnection
+      kms:
+        local:
+          $require: '@veramo/kms-local#KeyManagementSystem'
+          $args:
+            - $require: '@veramo/data-store#PrivateKeyStore'
+              $args:
+                - $ref: /dbConnection
+                - $require: '@veramo/kms-local#SecretBox'
+                  $args:
+                    - $ref: /constants/dbEncryptionKey
+
+# DID Manager
+didManager:
+  $require: '@veramo/did-manager#DIDManager'
+  $args:
+    - store:
+        $require: '@veramo/data-store#DIDStore'
+        $args:
+          - $ref: /dbConnection
+      defaultProvider: did:web
+      providers:
+        did:web:
+          $require: '@veramo/did-provider-web#WebDIDProvider'
+          $args:
+            - defaultKms: local
+        did:key:
+          $require: '@veramo/did-provider-key#KeyDIDProvider'
+          $args:
+            - defaultKms: local
+
+# Agent
+agent:
+  $require: '@veramo/core#Agent'
+  $args:
+    - schemaValidation: false
+      plugins:
+        - $ref: /keyManager
+        - $ref: /didManager
+        - $ref: /didResolver
+        - $require: '@veramo/did-comm#DIDComm'
+        - $require: '@veramo/credential-w3c#CredentialPlugin'
+        - $require: '@veramo/data-store#DataStore'
+          $args:
+            - $ref: /dbConnection
+        - $require: '@veramo/data-store#DataStoreORM'
+          $args:
+            - $ref: /dbConnection

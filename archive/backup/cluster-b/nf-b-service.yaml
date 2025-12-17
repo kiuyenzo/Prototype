@@ -1,0 +1,13 @@
+# Service for NF-B App in Cluster B
+apiVersion: v1
+kind: Service
+metadata:
+  name: nf-b-service
+  namespace: nf-b-namespace
+spec:
+  selector:
+    app: nf-b
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

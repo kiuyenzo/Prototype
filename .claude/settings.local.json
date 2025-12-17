@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kubectl apply:*)",
+      "Bash(curl:*)",
+      "Bash(kubectl get:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(./sidecar/build-and-deploy.sh:*)",
+      "Bash(npx tsc:*)",
+      "Bash(docker build:*)",
+      "Bash(ls:*)",
+      "Bash(./setup-clusters.sh:*)",
+      "Bash(docker info:*)",
+      "Bash(./scripts/deploy-mtls-certs.sh:*)",
+      "Bash(while IFS='=' read key val)",
+      "Bash(do echo \"$key\")",
+      "Bash(done)",
+      "Bash(kubectl create:*)",
+      "Bash(kubectl rollout restart:*)",
+      "Bash(kubectl wait:*)",
+      "Bash(./sidecar/test-sidecar-flow.sh:*)",
+      "Bash(kubectl delete:*)",
+      "Bash(kubectl exec:*)",
+      "Bash(sqlite3:*)",
+      "Bash(pgrep:*)",
+      "Bash(pkill:*)",
+      "Bash(pkill -f \"docker save\")",
+      "Bash(./sidecar/test-full-flow.sh:*)",
+      "Bash(docker inspect:*)",
+      "Bash(kubectl run:*)",
+      "Bash(kubectl --context kind-cluster-a create:*)",
+      "Bash(kubectl --context kind-cluster-b create namespace:*)",
+      "Bash(kubectl --context kind-cluster-a apply -f /Users/tanja/Downloads/Prototype-main/cluster-a/stub-service-nf-b.yaml)",
+      "Bash(kubectl --context kind-cluster-b apply -f /Users/tanja/Downloads/Prototype-main/cluster-b/stub-service-nf-a.yaml)",
+      "Bash(kubectl --context kind-cluster-a exec:*)",
+      "Bash(kubectl:*)"
+    ]
+  }
+}

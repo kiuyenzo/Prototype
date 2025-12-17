@@ -1,0 +1,149 @@
+# Envoy Sidecar Proxy Configuration for NF-B
+#
+# Architecture:
+# Veramo_NF_B ← → Envoy_Proxy_NF_B ← → Envoy_Gateway_B
+#
+# This proxy sits as a sidecar next to the Veramo agent and handles:
+# 1. Receiving DIDComm messages from Veramo_NF_B
+# 2. Forwarding to Envoy_Gateway_B over HTTP/2
+# 3. Receiving responses and forwarding back to Veramo_NF_B
+
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+
+static_resources:
+  listeners:
+    # Listener for incoming DIDComm messages from Veramo Agent
+    - name: veramo_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: veramo_ingress
+                codec_type: AUTO
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: veramo_service
+                      domains: ["*"]
+                      routes:
+                        # Route for outgoing DIDComm messages to NF-A
+                        - match:
+                            prefix: "/didcomm/send"
+                          route:
+                            cluster: envoy_gateway_b
+                            timeout: 30s
+                        # Route for incoming DIDComm messages from Gateway
+                        - match:
+                            prefix: "/didcomm/receive"
+                          route:
+                            cluster: veramo_agent
+                            timeout: 30s
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                http2_protocol_options: {}  # Enable HTTP/2
+
+    # Listener for incoming messages from Envoy_Gateway_B
+    - name: gateway_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8081
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: gateway_ingress
+                codec_type: AUTO
+                route_config:
+                  name: gateway_route
+                  virtual_hosts:
+                    - name: gateway_service
+                      domains: ["*"]
+                      routes:
+                        # All incoming messages go to Veramo Agent
+                        - match:
+                            prefix: "/didcomm"
+                          route:
+                            cluster: veramo_agent
+                            timeout: 30s
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                http2_protocol_options: {}  # Enable HTTP/2
+
+  clusters:
+    # Veramo Agent (local) - HTTP/1.1
+    - name: veramo_agent
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: veramo_agent
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: veramo-nf-b
+                      port_value: 3000
+      # No http2_protocol_options - use HTTP/1.1 for Veramo
+
+    # Envoy Gateway B (same cluster)
+    - name: envoy_gateway_b
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: envoy_gateway_b
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: envoy-gateway-b
+                      port_value: 8443
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          sni: envoy-gateway-b
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client-cert.pem
+                private_key:
+                  filename: /etc/envoy/certs/client-key.pem
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca-cert.pem
+              match_typed_subject_alt_names:
+                - san_type: DNS
+                  matcher:
+                    exact: "envoy-gateway-b"
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options:
+              initial_stream_window_size: 268435456  # 256MB
+              initial_connection_window_size: 268435456  # 256MB
+              max_concurrent_streams: 100
+
+# Logging
+layered_runtime:
+  layers:
+    - name: static_layer
+      static_layer:
+        overload:
+          global_downstream_max_connections: 50000

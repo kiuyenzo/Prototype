@@ -1,0 +1,10 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: cluster-b
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      # Istio Ingress Gateway HTTP2
+      - containerPort: 31058
+        hostPort: 31058
+        protocol: TCP

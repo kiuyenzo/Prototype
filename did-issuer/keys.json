@@ -1,0 +1,9 @@
+{
+  "signingKey": {
+    "kid": "did:web:kiuyenzo.github.io:Prototype:did-issuer#key-1",
+    "kms": "local",
+    "type": "Secp256k1",
+    "publicKeyHex": "04620596963c8f79c4a7128cd38f593912b74591a4ce693764043c3d8164fbddb432add1877dfe82e3663311c9d6de3045a8e4f313b264665812d1b01b9ca14af3",
+    "privateKeyHex": "32add1877dfe82e3663311c9d6de3045a8e4f313b264665812d1b01b9ca14af3"
+  }
+}

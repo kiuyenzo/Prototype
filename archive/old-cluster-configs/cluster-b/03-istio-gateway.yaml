@@ -1,0 +1,179 @@
+# Istio Gateway Configuration for Cluster-B
+# This configures the Ingress Gateway to receive DIDComm traffic from other clusters
+
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: nf-b-gateway
+  namespace: nf-b-namespace
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  # HTTP port for intra-mesh traffic
+  - port:
+      number: 80
+      name: http-didcomm
+      protocol: HTTP
+    hosts:
+    - "*"
+  # HTTPS port with mTLS for cross-cluster traffic (V1/V4a compliance)
+  - port:
+      number: 443
+      name: https-didcomm
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      caCertificates: /etc/istio/ca-certs/ca.crt
+    hosts:
+    - "*"
+
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: veramo-nf-b-vs
+  namespace: nf-b-namespace
+spec:
+  hosts:
+  - veramo-nf-a.nf-a-namespace.svc.cluster.local
+  - veramo-nf-b.nf-b-namespace.svc.cluster.local
+  gateways:
+  - nf-b-gateway
+  http:
+  # Route to local service (same cluster)
+  - match:
+    - headers:
+        host:
+          exact: veramo-nf-b.nf-b-namespace.svc.cluster.local
+    route:
+    - destination:
+        host: veramo-nf-b.nf-b-namespace.svc.cluster.local
+        port:
+          number: 3001
+  # Route to remote cluster (cluster-a) via mTLS (Shared CA configured)
+  - match:
+    - headers:
+        host:
+          exact: veramo-nf-a.nf-a-namespace.svc.cluster.local
+    route:
+    - destination:
+        host: cluster-a.external
+        port:
+          number: 32236  # HTTPS port with mTLS
+  # Fallback: route based on URI
+  - match:
+    - uri:
+        prefix: /didcomm
+    - uri:
+        prefix: /health
+    - uri:
+        prefix: /messaging
+    route:
+    - destination:
+        host: veramo-nf-b.nf-b-namespace.svc.cluster.local
+        port:
+          number: 3001
+
+---
+# VirtualService for mesh (sidecar-to-sidecar) traffic
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: veramo-nf-b-mesh-vs
+  namespace: nf-b-namespace
+spec:
+  hosts:
+  - veramo-nf-b.nf-b-namespace.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - match:
+    - uri:
+        prefix: /didcomm
+    - uri:
+        prefix: /health
+    - uri:
+        prefix: /messaging
+    route:
+    - destination:
+        host: veramo-nf-b.nf-b-namespace.svc.cluster.local
+        port:
+          number: 3001
+
+---
+# ServiceEntry: Define Cluster-A as an external service
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: cluster-a-gateway
+  namespace: nf-b-namespace
+spec:
+  hosts:
+  - cluster-a.external  # Logical hostname for Cluster-A
+  addresses:
+  - 172.18.0.2  # Docker network IP of Cluster-A (FIXED)
+  ports:
+  - number: 31950
+    name: http-didcomm
+    protocol: HTTP
+  - number: 31892
+    name: https-didcomm
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+  - address: 172.23.0.2
+    ports:
+      http-didcomm: 31950
+      https-didcomm: 32236
+
+---
+# DestinationRule: Configure traffic to Cluster-A Gateway with mTLS (Shared CA)
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cluster-a-mtls
+  namespace: nf-b-namespace
+spec:
+  host: cluster-a.external
+  trafficPolicy:
+    tls:
+      mode: MUTUAL  # mTLS with Shared CA certificates
+      clientCertificate: /etc/istio/client-certs/tls.crt
+      privateKey: /etc/istio/client-certs/tls.key
+      caCertificates: /etc/istio/client-certs/ca.crt
+      sni: cluster-a.external
+    connectionPool:
+      http:
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 10
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+# VirtualService for Egress: Route outbound traffic to Cluster-A through Gateway (mTLS)
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cluster-a-egress-vs
+  namespace: nf-b-namespace
+spec:
+  hosts:
+  - cluster-a.external
+  http:
+  - match:
+    - uri:
+        prefix: /didcomm
+    - uri:
+        prefix: /health
+    - uri:
+        prefix: /messaging
+    route:
+    - destination:
+        host: cluster-a.external
+        port:
+          number: 32236  # HTTPS port with mTLS

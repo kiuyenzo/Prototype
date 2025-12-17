@@ -1,0 +1,61 @@
+V1 (encrypted) - E2E verschlüsselt
+
+Mode: V1 (E2E encrypted)
+🔒 Encrypting DIDComm message
+✅ Message encrypted (1096 bytes JWE)
+📨 Received encrypted DIDComm message (V1)
+🔓 Decrypting received DIDComm message
+Modus wechseln
+V1 → V4a:
+
+# In cluster-a-deployment.yaml und cluster-b-deployment.yaml:
+- name: DIDCOMM_PACKING_MODE
+  value: "signed"   # statt "encrypted"
+Dann:
+
+./sidecar/build-and-deploy.sh
+Architektur-Übersicht
+Modus	DIDComm	Transport	Sicherheit
+V1	authcrypt (JWE)	mTLS	E2E + mTLS (doppelt)
+V4a	jws (signiert)	mTLS	nur mTLS
+V1: Gateway sieht nur Ciphertext (Zero-Trust)
+V4a: Gateway könnte Payload lesen (Trust auf mTLS)
+
+
+## neu
+
+Dein Design
+Segment	V1	V4a
+Pod ↔ Gateway	TCP (plain)	mTLS
+Gateway ↔ Gateway	mTLS	mTLS
+V1: Kein mTLS nötig, weil DIDComm-Payload bereits E2E verschlüsselt ist (Zero-Trust auf App-Ebene). V4a: mTLS nötig, weil DIDComm-Payload nicht verschlüsselt ist (Trust auf Transport-Ebene).
+Soll ich das so implementieren?
+Das würde bedeuten:
+V1: PeerAuthentication mit mtls: DISABLE für DIDComm-Traffic
+V4a: PeerAuthentication mit mtls: STRICT (Standard)
+Willst du das?
+
+
+Implementiert
+Neue Dateien:
+istio-mtls-v1.yaml - PERMISSIVE (TCP erlaubt)
+istio-mtls-v4a.yaml - STRICT (mTLS erzwungen)
+Aktualisiert:
+build-and-deploy.sh - Erkennt Modus und wendet richtige mTLS-Config an
+Modi
+Modus	DIDCOMM_PACKING_MODE	Pod ↔ Gateway	Gateway ↔ Gateway	DIDComm
+V1	encrypted	TCP (PERMISSIVE)	mTLS	JWE (E2E)
+V4a	signed	mTLS (STRICT)	mTLS	JWS
+Wechseln
+
+# V1 (encrypted):
+- name: DIDCOMM_PACKING_MODE
+  value: "encrypted"
+
+# V4a (signed):
+- name: DIDCOMM_PACKING_MODE
+  value: "signed"
+Dann:
+
+./sidecar/build-and-deploy.sh
+Soll ich jetzt den Test mit V4a (signed) ausführen?

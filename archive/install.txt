@@ -1,0 +1,7 @@
+docker
+kubectl
+kind
+istoctl
+
+
+Docker is now clean. Let me now recreate everything from scratch:1. Create Kind clusters 2. Build Docker image 3. Load into clusters 4. Apply Kubernetes manifests 5. Create credentialsLet me start.

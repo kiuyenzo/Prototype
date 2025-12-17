@@ -1,0 +1,47 @@
+# Ingress Gateway - Eingehender Traffic zu Cluster A
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: nf-a-ingress-gateway
+  namespace: nf-a-namespace
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+    # - "nf-a.local"
+    # - "nf-a.cluster-a.global"
+---
+# Egress Gateway - Ausgehender Traffic zu Cluster B
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: nf-a-egress-gateway
+  namespace: nf-a-namespace
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "nf-b.cluster-b.global"
+---
+# DestinationRule für Egress Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: egressgateway-for-cluster-b
+  namespace: nf-a-namespace
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

@@ -1,0 +1,15 @@
+# NodePort Service für direkten Zugriff auf NF-A
+apiVersion: v1
+kind: Service
+metadata:
+  name: veramo-nf-a-nodeport
+  namespace: nf-a-namespace
+spec:
+  type: NodePort
+  selector:
+    app: nf-a
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 31829  # Fest definierter Port für Tests
+    name: http

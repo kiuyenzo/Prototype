@@ -1,0 +1,38 @@
+{
+    "@context": [
+        "https://www.w3.org/ns/did/v1",
+        "https://w3id.org/security/suites/jws-2020/v1",
+        "https://w3id.org/security/suites/x25519-2020/v1"
+    ],
+    "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+    "verificationMethod": [
+        {
+            "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-1",
+            "type": "EcdsaSecp256k1VerificationKey2019",
+            "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+            "publicKeyHex": "04c6865fc59468fd51ac0718dd5ec926662666d5ff6f75e961bc60c94b3d374e5ada4ee7ceb5903f7fa1480873d6fb5fcc12f204fc946c0718557f925ba6e4202d"
+        },
+        {
+            "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-2",
+            "type": "X25519KeyAgreementKey2019",
+            "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+            "publicKeyHex": "53527a2827537cd4e48af3dda485cb082eb2e32788ed87c5b471e38924c70521"
+        }
+    ],
+    "authentication": [
+        "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-1"
+    ],
+    "assertionMethod": [
+        "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-1"
+    ],
+    "keyAgreement": [
+        "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-2"
+    ],
+    "service": [
+        {
+            "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#didcomm-1",
+            "type": "DIDCommMessaging",
+            "serviceEndpoint": "http://172.23.0.2:32147"
+        }
+    ]
+}

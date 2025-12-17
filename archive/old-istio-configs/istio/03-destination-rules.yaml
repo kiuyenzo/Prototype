@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: veramo-nf-a-mtls
+  namespace: nf-a-namespace
+spec:
+  host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

@@ -1,0 +1,23 @@
+# DestinationRule für lokalen Service in Cluster B
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: veramo-nf-b-local
+  namespace: nf-b-namespace
+spec:
+  host: veramo-nf-b.nf-b-namespace.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+# DestinationRule für remote Service in Cluster A
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: veramo-nf-a-remote
+  namespace: nf-b-namespace
+spec:
+  host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

@@ -1,0 +1,19 @@
+# Cluster A - Gateway für DIDComm mit PASSTHROUGH
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: nf-a-didcomm-gateway
+  namespace: nf-a-namespace
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  # TLS PASSTHROUGH - Gateway sieht nur TCP Stream
+  - port:
+      number: 443
+      name: tls-didcomm
+      protocol: TLS
+    tls:
+      mode: PASSTHROUGH  # Keine TLS-Terminierung!
+    hosts:
+    - "didcomm.nf-a.cluster-a.global"

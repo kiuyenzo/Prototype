@@ -1,0 +1,25 @@
+# Istio mTLS Configuration for V1 (encrypted DIDComm)
+# Pod ↔ Gateway: TCP (plain) - DIDComm is already E2E encrypted
+# Gateway ↔ Gateway: mTLS
+
+---
+# Disable mTLS for Pod-to-Gateway traffic in Cluster-A
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-a-namespace
+spec:
+  mtls:
+    mode: PERMISSIVE  # Accept both plain and mTLS (allows plain HTTP from pods)
+
+---
+# Disable mTLS for Pod-to-Gateway traffic in Cluster-B
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-b-namespace
+spec:
+  mtls:
+    mode: PERMISSIVE  # Accept both plain and mTLS (allows plain HTTP from pods)

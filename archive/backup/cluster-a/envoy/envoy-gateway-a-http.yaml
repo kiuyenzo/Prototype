@@ -1,0 +1,111 @@
+# Envoy Gateway A - HTTP Only (for local development)
+# Simplified version without mTLS for faster testing
+
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9902
+
+static_resources:
+  listeners:
+    # Listener for outgoing messages to Gateway B (internal → external)
+    - name: internal_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8443
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: internal_egress
+                codec_type: AUTO
+                route_config:
+                  name: internal_route
+                  virtual_hosts:
+                    - name: internal_service
+                      domains: ["*"]
+                      routes:
+                        # Route outgoing messages to Cluster B
+                        - match:
+                            prefix: "/didcomm"
+                          route:
+                            cluster: envoy_gateway_b
+                            timeout: 30s
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                http2_protocol_options: {}
+
+    # Listener for incoming messages from Gateway B (external)
+    - name: external_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8444
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: external_ingress
+                codec_type: AUTO
+                route_config:
+                  name: external_route
+                  virtual_hosts:
+                    - name: external_service
+                      domains: ["*"]
+                      routes:
+                        # Route incoming messages to local proxy
+                        - match:
+                            prefix: "/didcomm"
+                          route:
+                            cluster: envoy_proxy_nf_a
+                            timeout: 30s
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                http2_protocol_options: {}
+
+  clusters:
+    # Cluster for Envoy_Proxy_NF_A (internal)
+    - name: envoy_proxy_nf_a
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: envoy_proxy_nf_a
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: envoy-proxy-nf-a
+                      port_value: 8081
+      http2_protocol_options: {}
+
+    # Cluster for Envoy_Gateway_B (external)
+    - name: envoy_gateway_b
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: envoy_gateway_b
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: envoy-gateway-b
+                      port_value: 8444
+      http2_protocol_options: {}
+
+# Logging
+layered_runtime:
+  layers:
+    - name: static_layer
+      static_layer:
+        overload:
+          global_downstream_max_connections: 50000

@@ -1,0 +1,84 @@
+# Docker Compose for Cluster B
+#
+# Services:
+# - veramo-nf-b: Veramo Agent for NF-B
+# - envoy-proxy-nf-b: Envoy Sidecar Proxy
+# - envoy-gateway-b: Envoy Cluster Gateway
+
+version: '3.8'
+
+services:
+  # Veramo Agent NF-B
+  veramo-nf-b:
+    image: node:20-alpine
+    container_name: veramo-nf-b
+    working_dir: /app/prototype
+    volumes:
+      - ..:/app/prototype
+    ports:
+      - "3001:3000"
+    command: >
+      sh -c "
+        apk add --no-cache python3 make g++ &&
+        cd /app/prototype &&
+        npm install &&
+        npm rebuild sqlite3 &&
+        cd /app/prototype/shared &&
+        PORT=3000 node didcomm-http-server.js
+      "
+    networks:
+      cluster-b-network:
+        aliases:
+          - veramo-nf-b
+    environment:
+      - NODE_ENV=development
+      - DID_NF_B=did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
+      - DB_PATH=/app/database-nf-b.sqlite
+      - DB_ENCRYPTION_KEY=3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d
+
+  # Envoy Sidecar Proxy for NF-B
+  envoy-proxy-nf-b:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: envoy-proxy-nf-b
+    volumes:
+      - ./envoy/envoy-proxy-nf-b-http.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "8082:8080"  # DIDComm from Veramo
+      - "8083:8081"  # DIDComm from Gateway
+      - "9903:9901"  # Admin
+    networks:
+      cluster-b-network:
+        aliases:
+          - envoy-proxy-nf-b
+    depends_on:
+      - veramo-nf-b
+    command: >
+      /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
+
+  # Envoy Gateway for Cluster B
+  envoy-gateway-b:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: envoy-gateway-b
+    volumes:
+      - ./envoy/envoy-gateway-b-http.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "8445:8443"  # Internal (from Proxy)
+      - "8446:8444"  # External (from Gateway A)
+      - "9904:9902"  # Admin
+    networks:
+      cluster-b-network:
+        aliases:
+          - envoy-gateway-b
+      inter-cluster-network:
+        aliases:
+          - envoy-gateway-b
+    depends_on:
+      - envoy-proxy-nf-b
+    command: >
+      /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
+
+networks:
+  cluster-b-network:
+    driver: bridge
+  inter-cluster-network:
+    external: true  # Shared with Cluster A

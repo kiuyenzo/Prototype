@@ -1,0 +1,47 @@
+Sequenzdiagramm vs. Implementierung
+Diagramm	Implementierung	Status
+Phase 1		
+NF_A → Veramo: Service Request	SERVICE_REQUEST received	✅
+Resolve DID Document of B	Fetching DID from GitHub	✅
+DIDComm[VP_Auth_Request + PD_A]	Message encrypted (1856 bytes JWE)	✅
+Phase 2		
+Create VP_B based on PD_A	Creating VP_B matching their PD	✅
+DIDComm[VP_B + PD_B]	Message encrypted (5828 bytes JWE)	✅
+Resolve IssuerDID from VP_B	Verifying VP against PD	✅
+Verify VP_B	VP verified successfully	✅
+Create VP_A based on PD_B	Creating VP_A matching their PD_B	✅
+DIDComm[VP_A]	Message encrypted (4938 bytes JWE)	✅
+Resolve Issuer DID from VP_A	(intern bei Verification)	✅
+Verify VP_A	VP_A verified successfully	✅
+Phase 3		
+DIDComm[Authorized]	Session authenticated + Auth Confirmation	✅
+DIDComm[Service_Request]	Sending queued SERVICE_REQUEST	✅
+Veramo_NF_B → NF_B: Service Request	Processing SERVICE_REQUEST	✅
+NF_B → Veramo: Service Response	NF Service Handler	✅
+DIDComm[Service_Response]	Message encrypted (1331 bytes JWE)	✅
+Veramo → NF_A: Service_Response	Received SERVICE_RESPONSE	✅
+Transport Layer (Istio = Envoy)
+Diagramm	Implementierung
+Envoy_Proxy_NF_A	Istio Sidecar (automatisch)
+Envoy_Gateway_A	istio-ingressgateway
+HTTP/2 (mTLS)	✅ TLS 1.3 + mTLS mit Shared CA
+Der Flow ist 1:1 implementiert! 🎉
+
+# TO DO
+
+Aspekt	Kombiniert	Getrennt
+Skalierbarkeit	NF+Veramo zusammen	Unabhängig skalierbar
+Wiederverwendbarkeit	1:1 Kopplung	1 Veramo für N NFs
+Sicherheit	Alles in einem Container	Identity isoliert
+5G SBA Konformität	⚠️	✅
+Komplexität	Einfach	Höher
+
+jede nf soll ja einen veramo haben
+
+"Die Architektur ist 5G SBA-konform, da jede Network Function als eigenständiger Service mit definierten Schnittstellen operiert. Die interne Integration von Veramo beeinflusst die externe SBA-Konformität nicht."
+
+
+
+./setup-clusters.sh           # Cluster erstellen
+./sidecar/build-and-deploy.sh # Deployen
+./sidecar/test-sidecar-flow.sh # Testen
