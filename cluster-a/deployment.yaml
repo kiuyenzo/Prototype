@@ -53,6 +53,8 @@ spec:
               value: "3000"
             - name: MY_DID
               value: "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
+            - name: OWN_DID
+              value: "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
             - name: DB_PATH
               value: "/app/cluster-a/database-nf-a.sqlite"
             - name: DB_ENCRYPTION_KEY

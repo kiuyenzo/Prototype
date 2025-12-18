@@ -1,0 +1,59 @@
+# Aktueller stand
+
+Veramo_NF_A DB
+Typ	Was	Warum
+DID	did:web:...cluster-a:did-nf-a	Eigene Identität
+Private Keys	Secp256k1 + X25519	Signieren & Verschlüsseln
+VC	Eigene VC_A	Für VP-Erstellung
+VP	VP_A (selbst erstellt)	Nachweis eigener Auth
+VP	VP_B (empfangen)	Audit: Peer hat sich authentifiziert
+Messages	DIDComm Nachrichten	Kommunikationslog
+
+Veramo_NF_B DB
+Typ	Was	Warum
+DID	did:web:...cluster-b:did-nf-b	Eigene Identität
+Private Keys	Secp256k1 + X25519	Signieren & Verschlüsseln
+VC	Eigene VC_B	Für VP-Erstellung
+VP	VP_B (selbst erstellt)	Nachweis eigener Auth
+VP	VP_A (empfangen)	Audit: Peer hat sich authentifiziert
+Messages	DIDComm Nachrichten	Kommunikationslog
+
+
+# Alle Messages
+sqlite3 cluster-a/database-nf-a.sqlite "SELECT * FROM message;"
+
+# VC Details
+sqlite3 cluster-a/database-nf-a.sqlite "SELECT raw FROM credential;" | jq .
+
+# VP Details  
+sqlite3 cluster-a/database-nf-a.sqlite "SELECT raw FROM presentation;" | jq .
+
+# Tabelle mit Header
+sqlite3 -header -column cluster-a/database-nf-a.sqlite "SELECT id, type, fromDid, toDid FROM message;"
+
+# JSON Output
+sqlite3 -json cluster-a/database-nf-a.sqlite "SELECT * FROM message;"
+
+# CSV Output
+sqlite3 -header -csv cluster-a/database-nf-a.sqlite "SELECT * FROM message;"
+
+# Nur bestimmte Felder (kürzer)
+sqlite3 -header -column cluster-a/database-nf-a.sqlite "SELECT substr(type,40) as type, substr(fromDid,45) as 'from' FROM message;"
+
+
+Interaktiver SQLite Modus:
+
+sqlite3 cluster-a/database-nf-a.sqlite
+Dann im SQLite-Prompt:
+
+.tables                    -- Alle Tabellen anzeigen
+.schema identifier         -- Struktur einer Tabelle
+.headers on                -- Header aktivieren
+.mode column               -- Spalten-Format
+
+SELECT * FROM identifier;  -- Daten anzeigen
+SELECT * FROM credential;
+SELECT * FROM presentation;
+SELECT * FROM message;
+
+.quit                      -- Beenden

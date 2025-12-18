@@ -9,19 +9,14 @@ import { migrations, Entities } from '@veramo/data-store';
 import { resolve, dirname } from 'path';
 import { existsSync, unlinkSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
+import { CONFIG } from './config.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const C = {
-  'nf-a':   { db: '../cluster-a/database-nf-a.sqlite', key: 'ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6', did: 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a', enc: true },
-  'nf-b':   { db: '../cluster-b/database-nf-b.sqlite', key: '3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d', did: 'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b', enc: true },
-  'issuer': { db: '../did-issuer/database-issuer.sqlite', key: 'a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd', did: 'did:web:kiuyenzo.github.io:Prototype:did-issuer', enc: false }
-};
-
 const name = process.argv[2];
-if (!name || !C[name]) { console.log('Usage: node generate-keys.mjs <nf-a|nf-b|issuer>'); process.exit(0); }
+if (!name || !CONFIG[name]) { console.log('Usage: node generate-keys.mjs <nf-a|nf-b|issuer>'); process.exit(0); }
 
-const c = C[name], dbPath = resolve(__dirname, c.db);
+const c = CONFIG[name], dbPath = resolve(__dirname, c.db);
 mkdirSync(dirname(dbPath), { recursive: true });
 if (existsSync(dbPath)) { unlinkSync(dbPath); console.log('Alte DB gelöscht'); }
 

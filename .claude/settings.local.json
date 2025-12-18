@@ -35,7 +35,12 @@
       "Bash(kubectl --context kind-cluster-a exec:*)",
       "Bash(kubectl:*)",
       "Bash(docker system:*)",
-      "Bash(node scripts/generate-keys.mjs:*)"
+      "Bash(node scripts/generate-keys.mjs:*)",
+      "Bash(node -e \"process.stdout.write(Buffer.from(require(''fs'').readFileSync(0,''utf8'').trim(),''base64url'').toString())\")",
+      "Bash(node scripts/create-credentials.mjs:*)",
+      "Bash(kubectl --context kind-cluster-a get pods -n envoy-gateway-system)",
+      "Bash(docker ps:*)",
+      "Bash(docker network inspect:*)"
     ]
   }
 }

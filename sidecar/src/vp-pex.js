@@ -76,11 +76,13 @@ function selectCredentialsForPD(credentials, presentationDefinition) {
  * @param holderDid - Holder DID
  * @param availableCredentials - All credentials the holder has
  * @param presentationDefinition - PD from the verifier
+ * @param verifierDid - DID of the verifier (optional, for aud claim)
  * @returns Verifiable Presentation
  */
-async function createVPFromPD(agent, holderDid, availableCredentials, presentationDefinition) {
+async function createVPFromPD(agent, holderDid, availableCredentials, presentationDefinition, verifierDid) {
     console.log('📋 Creating VP from Presentation Definition (PEX)');
     console.log(`   Holder: ${holderDid}`);
+    console.log(`   Verifier: ${verifierDid || '(not specified)'}`);
     console.log(`   PD: ${presentationDefinition.id}`);
     console.log(`   Available credentials: ${availableCredentials.length}`);
 
@@ -95,13 +97,20 @@ async function createVPFromPD(agent, holderDid, availableCredentials, presentati
 
     // Step 2: Create VP with Veramo
     try {
+        const presentationData = {
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            type: ['VerifiablePresentation'],
+            holder: holderDid,
+            verifiableCredential: selectedCredentials
+        };
+
+        // Add verifier if provided (becomes 'aud' in JWT)
+        if (verifierDid) {
+            presentationData.verifier = [verifierDid];
+        }
+
         const vp = await agent.createVerifiablePresentation({
-            presentation: {
-                '@context': ['https://www.w3.org/2018/credentials/v1'],
-                type: ['VerifiablePresentation'],
-                holder: holderDid,
-                verifiableCredential: selectedCredentials
-            },
+            presentation: presentationData,
             proofFormat: 'jwt',
             save: true  // Save VP to database for veramo explore
         });

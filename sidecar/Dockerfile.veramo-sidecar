@@ -31,10 +31,15 @@ COPY scripts/ ./scripts/
 COPY cluster-a/ ./cluster-a/
 COPY cluster-b/ ./cluster-b/
 
+# Copy entrypoint script
+COPY sidecar/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
 # Default environment
 ENV VERAMO_PORT=3001
 ENV NF_PORT=3000
 ENV USE_KUBERNETES=true
+# DB_PATH and OWN_DID are set per cluster in deployment
 
 EXPOSE 3001
 
@@ -42,4 +47,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:3001/health || exit 1
 
-CMD ["node", "sidecar/veramo-sidecar.js"]
+# Use entrypoint for DB reset on startup
+ENTRYPOINT ["./entrypoint.sh"]

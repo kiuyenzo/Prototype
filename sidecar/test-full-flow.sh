@@ -54,6 +54,18 @@ kubectl wait --for=condition=ready pod/$NF_A_POD -n nf-a-namespace --timeout=60s
 kubectl config use-context kind-cluster-b > /dev/null 2>&1
 kubectl wait --for=condition=ready pod/$NF_B_POD -n nf-b-namespace --timeout=60s > /dev/null 2>&1
 
+# Note: Database cleanup now happens automatically on pod startup (entrypoint.sh)
+
+# Copy reset DBs to local Veramo Explorer (so it's also reset)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+echo "📦 Copying reset DBs to local Veramo Explorer..."
+rm -f "$PROJECT_DIR/cluster-a/database-nf-a.sqlite" "$PROJECT_DIR/cluster-b/database-nf-b.sqlite"
+kubectl --context kind-cluster-a exec -n nf-a-namespace $NF_A_POD -c veramo-sidecar -- cat /app/cluster-a/database-nf-a.sqlite > "$PROJECT_DIR/cluster-a/database-nf-a.sqlite" 2>/dev/null
+kubectl --context kind-cluster-b exec -n nf-b-namespace $NF_B_POD -c veramo-sidecar -- cat /app/cluster-b/database-nf-b.sqlite > "$PROJECT_DIR/cluster-b/database-nf-b.sqlite" 2>/dev/null
+echo "✅ Veramo Explorer reset"
+echo ""
+
 # Create credentials
 echo "🎫 Creating credentials..."
 kubectl config use-context kind-cluster-a > /dev/null 2>&1
@@ -135,6 +147,31 @@ echo ""
 echo "NF-B Session:"
 kubectl config use-context kind-cluster-b > /dev/null 2>&1
 kubectl exec -n nf-b-namespace $NF_B_POD -c veramo-sidecar -- curl -s http://localhost:3001/session/status 2>/dev/null | jq -r '.sessions[] | "  SessionID: \(.sessionId) | Status: \(.status) | Authenticated: \(.authenticated)"'
+echo ""
+
+echo "═══════════════════════════════════════════════════════════════════════════════"
+echo "COPY DATABASES FOR VERAMO EXPLORER"
+echo "═══════════════════════════════════════════════════════════════════════════════"
+echo ""
+
+# Copy complete databases from pods to local Veramo Explorer
+# Pod DBs have: DID, VC, VPs, Messages, and cached Peer-DIDs (for "from" display)
+echo "📦 Copying databases from pods..."
+rm -f "$PROJECT_DIR/cluster-a/database-nf-a.sqlite" "$PROJECT_DIR/cluster-b/database-nf-b.sqlite"
+kubectl --context kind-cluster-a exec -n nf-a-namespace $NF_A_POD -c veramo-sidecar -- cat /app/cluster-a/database-nf-a.sqlite > "$PROJECT_DIR/cluster-a/database-nf-a.sqlite" 2>/dev/null
+kubectl --context kind-cluster-b exec -n nf-b-namespace $NF_B_POD -c veramo-sidecar -- cat /app/cluster-b/database-nf-b.sqlite > "$PROJECT_DIR/cluster-b/database-nf-b.sqlite" 2>/dev/null
+
+# Remove peer VCs (redundant - already in VP)
+echo "🧹 Removing peer VCs (redundant)..."
+sqlite3 "$PROJECT_DIR/cluster-a/database-nf-a.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a';" 2>/dev/null
+sqlite3 "$PROJECT_DIR/cluster-b/database-nf-b.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b';" 2>/dev/null
+
+echo "✅ cluster-a/database-nf-a.sqlite"
+echo "✅ cluster-b/database-nf-b.sqlite"
+echo ""
+echo "🔍 Veramo Explorer starten:"
+echo "   cd cluster-a && veramo server --config agent.yml"
+echo "   cd cluster-b && veramo server --config agent.yml"
 echo ""
 
 echo "╔════════════════════════════════════════════════════════════════════════════╗"

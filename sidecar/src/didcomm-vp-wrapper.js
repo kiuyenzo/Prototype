@@ -94,7 +94,7 @@ class DIDCommVPWrapper {
         try {
             // Create VP matching their Presentation Definition
             console.log('   Creating VP_B matching their PD...');
-            const vp = await (0, vp_creation_manuell_js_1.createVPFromPD)(this.agent, ourDid, credentials, message.body.presentation_definition);
+            const vp = await (0, vp_creation_manuell_js_1.createVPFromPD)(this.agent, ourDid, credentials, message.body.presentation_definition, message.from);
             context.ourVP = vp;
             // Create response message with our VP and our PD
             const responseMessage = (0, didcomm_messages_js_1.createVPWithPD)(ourDid, message.from, vp, ourPresentationDefinition, 'Here is my VP matching your PD, and my PD for you to satisfy');
@@ -168,7 +168,7 @@ class DIDCommVPWrapper {
             } catch (e) { console.log('   ⚠️  Could not save VP_B:', e.message); }
             // Create our VP matching their PD
             console.log('   Creating VP_A matching their PD_B...');
-            const ourVP = await (0, vp_creation_manuell_js_1.createVPFromPD)(this.agent, context.ourDid, credentials, message.body.presentation_definition);
+            const ourVP = await (0, vp_creation_manuell_js_1.createVPFromPD)(this.agent, context.ourDid, credentials, message.body.presentation_definition, message.from);
             context.ourVP = ourVP;
             // Create response message
             const responseMessage = (0, didcomm_messages_js_1.createVPResponse)(context.ourDid, message.from, ourVP, 'Here is my VP matching your PD');
