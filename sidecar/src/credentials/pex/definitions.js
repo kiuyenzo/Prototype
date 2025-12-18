@@ -33,13 +33,6 @@ exports.PRESENTATION_DEFINITION_A = {
                             type: 'string',
                             const: 'network-function'
                         }
-                    },
-                    {
-                        path: ['$.credentialSubject.status'],
-                        filter: {
-                            type: 'string',
-                            const: 'active'
-                        }
                     }
                 ]
             }
@@ -71,13 +64,6 @@ exports.PRESENTATION_DEFINITION_B = {
                         filter: {
                             type: 'string',
                             const: 'network-function'
-                        }
-                    },
-                    {
-                        path: ['$.credentialSubject.status'],
-                        filter: {
-                            type: 'string',
-                            const: 'active'
                         }
                     },
                     {

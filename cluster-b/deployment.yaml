@@ -39,7 +39,7 @@ spec:
 
         # Container 2: Veramo Sidecar (DIDComm Handler)
         - name: veramo-sidecar
-          image: veramo-sidecar:sidecar
+          image: veramo-sidecar:sdr-v2
           imagePullPolicy: Never
           ports:
             - containerPort: 3001

@@ -51,12 +51,15 @@ const did_comm_1 = require("@veramo/did-comm");
 const message_handler_1 = require("@veramo/message-handler");
 const typeorm_1 = require("typeorm");
 const data_store_2 = require("@veramo/data-store");
-// Import from src modules (inside sidecar/)
-const didcomm_vp_wrapper_js_1 = require("./src/didcomm-vp-wrapper.js");
-const didcomm_messages_js_1 = require("./src/didcomm-messages.js");
-const presentation_definitions_js_1 = require("./src/presentation-definitions.js");
-const session_manager_js_1 = require("./src/session-manager.js");
-const didcomm_encryption_js_1 = require("./src/didcomm-encryption.js");
+// @veramo/selective-disclosure ist deprecated in v6 - nicht verwenden
+// Import from src modules (neue Struktur)
+const didcomm_vp_wrapper_js_1 = require("./src/didcomm/vp-wrapper.js");
+const didcomm_messages_js_1 = require("./src/didcomm/messages.js");
+const didcomm_encryption_js_1 = require("./src/didcomm/encryption.js");
+const session_manager_js_1 = require("./src/session/manager.js");
+// Credentials: PEX (auskommentiert) vs SDR (aktiv)
+// const presentation_definitions_js_1 = require("./src/credentials/pex/definitions.js"); // PEX
+const sdr_definitions_js_1 = require("./src/credentials/sdr/definitions.js"); // SDR aktiv
 // Configuration
 const DB_PATH = process.env.DB_PATH || './database.sqlite';
 const DB_ENCRYPTION_KEY = process.env.DB_ENCRYPTION_KEY || '';
@@ -66,7 +69,8 @@ const MY_DID = process.env.MY_DID || '';
 const PACKING_MODE = process.env.DIDCOMM_PACKING_MODE || 'encrypted'; // 'encrypted' (V1) or 'signed' (V4a)
 // Determine which NF this is
 const isNFA = MY_DID.includes('nf-a');
-const MY_PD = isNFA ? presentation_definitions_js_1.PRESENTATION_DEFINITION_A : presentation_definitions_js_1.PRESENTATION_DEFINITION_B;
+// const MY_PD = isNFA ? presentation_definitions_js_1.PRESENTATION_DEFINITION_A : presentation_definitions_js_1.PRESENTATION_DEFINITION_B; // PEX auskommentiert
+const MY_SDR = isNFA ? sdr_definitions_js_1.SDR_A : sdr_definitions_js_1.SDR_B; // SDR aktiv
 const THEIR_DID = isNFA
     ? 'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b'
     : 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a';
@@ -116,6 +120,7 @@ async function initializeAgent() {
             new data_store_1.DataStoreORM(dbConnection),
             new did_comm_1.DIDComm(),
             new message_handler_1.MessageHandler({ messageHandlers: [] }),
+            // SelectiveDisclosure ist deprecated in v6 - manuelle SDR-Implementierung wird verwendet
         ],
     });
     wrapper = new didcomm_vp_wrapper_js_1.DIDCommVPWrapper(agent);
@@ -351,7 +356,7 @@ async function handleIncomingMessage(messageOrEncrypted) {
             // Phase 1: Received VP Auth Request
             const authReq = message;
             const session = sessionManager.createSession(authReq.from, authReq.to[0], authReq.id);
-            const vpWithPD = await wrapper.handleVPAuthRequest(authReq, MY_DID, credentials, MY_PD);
+            const vpWithPD = await wrapper.handleVPAuthRequest(authReq, MY_DID, credentials, MY_SDR);
             sessionManager.updateSession(session.sessionId, { responderPdSent: true });
             return vpWithPD;
         }
@@ -376,7 +381,7 @@ async function handleIncomingMessage(messageOrEncrypted) {
                 throw new Error('No active session found');
             }
             console.log(`   Found session: ${existingSession.sessionId}`);
-            const vpResponse = await wrapper.handleVPWithPD(vpWithPDMsg, credentials, MY_DID, MY_PD);
+            const vpResponse = await wrapper.handleVPWithPD(vpWithPDMsg, credentials, MY_DID, MY_SDR);
             sessionManager.markResponderVpReceived(existingSession.sessionId);
             return vpResponse;
         }
@@ -541,7 +546,7 @@ function createHTTPServer() {
                         });
                         // Create session and send VP_AUTH_REQUEST
                         const newSession = sessionManager.createSession(MY_DID, target, `challenge-${Date.now()}`);
-                        const authRequest = (0, didcomm_messages_js_1.createVPAuthRequest)(MY_DID, target, MY_PD, 'Authentication required for service access');
+                        const authRequest = (0, didcomm_messages_js_1.createVPAuthRequest)(MY_DID, target, MY_SDR, 'Authentication required for service access');
                         sessionManager.updateSession(newSession.sessionId, { initiatorPdSent: true });
                         await sendDIDCommMessage(authRequest, target);
                         res.writeHead(202, { 'Content-Type': 'application/json' });

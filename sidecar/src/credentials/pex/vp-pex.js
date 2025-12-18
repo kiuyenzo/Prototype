@@ -56,7 +56,6 @@ function selectCredentialsForPD(credentials, presentationDefinition) {
                 const subject = cred.credentialSubject || {};
                 // Basic matching for NetworkFunctionCredential
                 return types.includes('NetworkFunctionCredential') &&
-                       subject.status === 'active' &&
                        subject.role === 'network-function';
             });
         }
@@ -167,7 +166,7 @@ async function verifyVPAgainstPD(agent, presentation, presentationDefinition) {
             const types = cred.type || [];
             const subject = cred.credentialSubject || {};
             return types.includes('NetworkFunctionCredential') &&
-                   subject.status === 'active';
+                   subject.role === 'network-function';
         });
 
         if (hasValidCredentials) {

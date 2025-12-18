@@ -31,8 +31,8 @@ COPY scripts/ ./scripts/
 COPY cluster-a/ ./cluster-a/
 COPY cluster-b/ ./cluster-b/
 
-# Copy entrypoint script
-COPY sidecar/entrypoint.sh ./entrypoint.sh
+# Copy entrypoint script (neue Struktur)
+COPY sidecar/docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 # Default environment

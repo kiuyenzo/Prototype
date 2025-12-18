@@ -40,7 +40,23 @@
       "Bash(node scripts/create-credentials.mjs:*)",
       "Bash(kubectl --context kind-cluster-a get pods -n envoy-gateway-system)",
       "Bash(docker ps:*)",
-      "Bash(docker network inspect:*)"
+      "Bash(docker network inspect:*)",
+      "Bash(node -c:*)",
+      "Bash(node:*)",
+      "Bash(kubectl config get-contexts:*)",
+      "Bash(kubectl config use-context:*)",
+      "Bash(kind load docker-image:*)",
+      "Bash(kubectl rollout:*)",
+      "Bash(bash:*)",
+      "Bash(cat:*)",
+      "Bash(docker run:*)",
+      "Bash(kubectl --context kind-cluster-a delete pods -n nf-a-namespace --all --force)",
+      "Bash(kubectl --context kind-cluster-a apply -f cluster-a/deployment.yaml)",
+      "Bash(kubectl --context kind-cluster-b apply -f cluster-b/deployment.yaml)",
+      "Bash(grep:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(xargs -I {} bash -c 'echo \"\"=== {} ===\"\" && grep \"\"require\\\\|import\"\" {} | head -5')"
     ]
   }
 }
