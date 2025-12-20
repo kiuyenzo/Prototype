@@ -65,7 +65,8 @@
       "Bash(kubectl --context kind-cluster-b get pods -n nf-b-namespace)",
       "Bash(kubectl --context kind-cluster-a get svc -n nf-a-namespace -o wide)",
       "Bash(find:*)",
-      "Bash(du:*)"
+      "Bash(du:*)",
+      "Bash(node --check:*)"
     ]
   }
 }

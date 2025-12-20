@@ -68,6 +68,9 @@ kubectl apply -f cluster-a/deployment.yaml
 echo "   Applying Istio gateway configuration..."
 kubectl apply -f cluster-a/gateway.yaml
 
+echo "   Applying Zero Trust security policies..."
+kubectl apply -f cluster-a/security.yaml
+
 echo "   Applying Istio mTLS configuration ($PACKING_MODE mode)..."
 if [ "$PACKING_MODE" = "encrypted" ]; then
   kubectl apply -f sidecar/istio-mtls-v1.yaml --context kind-cluster-a 2>/dev/null || true
@@ -101,6 +104,9 @@ kubectl apply -f cluster-b/deployment.yaml
 
 echo "   Applying Istio gateway configuration..."
 kubectl apply -f cluster-b/gateway.yaml
+
+echo "   Applying Zero Trust security policies..."
+kubectl apply -f cluster-b/security.yaml
 
 echo "   Applying Istio mTLS configuration ($PACKING_MODE mode)..."
 if [ "$PACKING_MODE" = "encrypted" ]; then

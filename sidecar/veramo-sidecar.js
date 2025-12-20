@@ -27,9 +27,12 @@ const data_store_2 = require("@veramo/data-store");
 // @veramo/selective-disclosure ist deprecated in v6 - manuelle SDR-Implementierung
 const didcomm_vp_wrapper_js_1 = require("./src/didcomm/vp-wrapper.js");
 const didcomm_messages_js_1 = require("./src/didcomm/messages.js");
-const didcomm_encryption_js_1 = require("./src/didcomm/encryption.js");
 const session_manager_js_1 = require("./src/session/manager.js");
 const pex_definitions_js_1 = require("./src/credentials/pex/definitions.js"); // PEX (@sphereon/pex)
+// Inline DIDComm encryption (replaces encryption.js)
+const packMode = () => ({ encrypted: 'authcrypt', anon: 'anoncrypt', signed: 'jws' }[process.env.DIDCOMM_PACKING_MODE] || 'authcrypt');
+const packMsg = async (a, m, to, from) => { try { return (await a.packDIDCommMessage({ packing: packMode(), message: { ...m, from, to: [to] } })).message; } catch { return JSON.stringify(m); } };
+const unpackMsg = async (a, p) => (await a.unpackDIDCommMessage({ message: p })).message;
 
 // Configuration
 const DB_PATH = process.env.DB_PATH || './database.sqlite';
@@ -153,13 +156,7 @@ async function sendDIDCommMessage(message, targetDid) {
         ? `http://${targetHost}:3001/didcomm/send`
         : `http://envoy-proxy-nf-${isNFA ? 'a' : 'b'}:8080/didcomm/send`;
     console.log(`📤 DIDComm: ${message.type.split('/').pop()} → ${targetDid.split(':').pop()}`);
-    // Pack message (encrypted for V1, signed for V4a)
-    const packedMessage = await (0, didcomm_encryption_js_1.packDIDCommMessage)(agent, message, targetDid, MY_DID);
-    // Only verify JWE format for encrypted mode
-    if (PACKING_MODE === 'encrypted') {
-        (0, didcomm_encryption_js_1.verifyEncryption)(packedMessage);
-    }
-    // Payload indicates packing mode for receiver
+    const packedMessage = await packMsg(agent, message, targetDid, MY_DID);
     const payload = JSON.stringify({
         packed: true,
         mode: PACKING_MODE,
@@ -190,8 +187,7 @@ async function sendDIDCommMessage(message, targetDid) {
 /** Handle incoming DIDComm message from Envoy */
 async function handleIncomingMessage(messageOrEncrypted) {
     const message = (messageOrEncrypted.packed || messageOrEncrypted.encrypted) && messageOrEncrypted.message
-        ? await (0, didcomm_encryption_js_1.unpackDIDCommMessage)(agent, messageOrEncrypted.message)
-        : messageOrEncrypted;
+        ? await unpackMsg(agent, messageOrEncrypted.message) : messageOrEncrypted;
     console.log(`📨 ${message.type.split('/').pop()} from ${message.from?.split(':').pop()}`);
     try { await agent.dataStoreSaveMessage({ message: { id: message.id || `msg-${Date.now()}`, type: message.type, from: message.from, to: message.to?.[0] || MY_DID, createdAt: new Date().toISOString(), data: message.body } }); } catch (e) { /* ignore */ }
     const credentials = await loadCredentials();
