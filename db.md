@@ -45,3 +45,20 @@ alias	type	privateKeyHex
 ...did-nf-a#key-1	Secp256k1	a4ed7ba7... (encrypted)
 ...did-nf-a#key-2	X25519	895a8513... (encrypted)
 Die alias Spalte muss mit der kid in der key Tabelle übereinstimmen - das ist der Fix, den wir im generate-keys.mjs Script gemacht haben.
+
+
+# Zusammenfassung: Reset-Optionen
+Befehl	Was passiert	Wann nutzen
+./tests/test-happy-path.sh	Normaler Test	Schneller Check
+./tests/test-happy-path.sh --reset	Pod-Restart + DB-Reset + Test	Frischer State für Demo
+./sidecar/scripts/restart-pods.sh	Nur Pod-Restart + DB Sync	Manueller Reset
+
+
+Empfehlung
+Für deine Arbeit/Demo:
+
+# Frischer Test mit Reset:
+./tests/test-happy-path.sh --reset
+
+# Normaler Test (wenn Pods schon laufen):
+./tests/test-happy-path.sh

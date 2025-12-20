@@ -1,197 +1,71 @@
 "use strict";
 /**
  * VP Creation & Verification using Veramo SDR
- *
  * Alternative to vp-pex.js - uses Veramo's native Selective Disclosure Request
- * instead of @sphereon/pex
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createVPFromSDR = createVPFromSDR;
 exports.verifyVPAgainstSDR = verifyVPAgainstSDR;
 exports.selectCredentialsForSDR = selectCredentialsForSDR;
 
-/**
- * Select credentials that match an SDR
- *
- * @param agent - Veramo agent
- * @param sdr - Selective Disclosure Request
- * @returns Matching credentials
- */
+/** Check if credential matches SDR claims */
+const matchesSDR = (subject, sdr) => sdr.claims.every(claim =>
+    !claim.isEssential || (subject[claim.claimType] !== undefined && (!claim.claimValue || subject[claim.claimType] === claim.claimValue))
+);
+
+/** Select credentials that match an SDR */
 async function selectCredentialsForSDR(agent, sdr) {
-    console.log('🔍 Selecting credentials for SDR');
-
     try {
-        // Get all credentials from the agent
         const allCredentials = await agent.dataStoreORMGetVerifiableCredentials({});
-
-        // Filter credentials that match SDR claims
-        const matchingCredentials = allCredentials.filter(credRecord => {
-            const cred = credRecord.verifiableCredential;
-            const subject = cred.credentialSubject || {};
-
-            // Check all essential claims
-            return sdr.claims.every(claim => {
-                if (!claim.isEssential) return true;
-
-                const hasType = subject[claim.claimType] !== undefined;
-                const matchesValue = !claim.claimValue || subject[claim.claimType] === claim.claimValue;
-
-                return hasType && matchesValue;
-            });
-        });
-
-        console.log(`   Found ${matchingCredentials.length} matching credential(s)`);
-        return matchingCredentials.map(cr => cr.verifiableCredential);
-
+        const matching = allCredentials.filter(cr => matchesSDR(cr.verifiableCredential.credentialSubject || {}, sdr));
+        console.log(`🔍 SDR: ${matching.length}/${allCredentials.length} credentials match`);
+        return matching.map(cr => cr.verifiableCredential);
     } catch (error) {
-        console.error('❌ SDR credential selection failed:', error.message);
+        console.error('❌ SDR selection failed:', error.message);
         return [];
     }
 }
 
-/**
- * Create VP based on SDR
- *
- * @param agent - Veramo agent instance
- * @param holderDid - Holder DID
- * @param availableCredentials - Available credentials (passed from caller)
- * @param sdr - Selective Disclosure Request
- * @param verifierDid - DID of the verifier (optional)
- * @returns Verifiable Presentation
- */
+/** Create VP based on SDR */
 async function createVPFromSDR(agent, holderDid, availableCredentials, sdr, verifierDid) {
-    console.log('📋 Creating VP from SDR');
-    console.log(`   Holder: ${holderDid}`);
-    console.log(`   Verifier: ${verifierDid || '(not specified)'}`);
-    console.log(`   Available credentials: ${availableCredentials.length}`);
+    console.log(`📋 VP from SDR: holder=${holderDid.split(':').pop()}, creds=${availableCredentials.length}`);
 
-    // Log SDR requirements
-    console.log('   📝 SDR Requirements:');
-    sdr.claims.forEach((claim, i) => {
-        const valueStr = claim.claimValue ? `= "${claim.claimValue}"` : '(any value)';
-        console.log(`      [${i+1}] ${claim.claimType} ${valueStr} ${claim.isEssential ? '(essential)' : '(optional)'}`);
-    });
+    const selectedCredentials = availableCredentials.filter(cred => matchesSDR(cred.credentialSubject || {}, sdr));
+    if (selectedCredentials.length === 0) throw new Error('No credentials match the SDR');
 
-    // Step 1: Filter credentials matching SDR
-    console.log('   🔎 Checking credentials against SDR...');
-    const selectedCredentials = availableCredentials.filter((cred, idx) => {
-        const subject = cred.credentialSubject || {};
-        console.log(`      Credential ${idx+1}: subject.id=${subject.id || 'N/A'}`);
+    const presentationData = {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        type: ['VerifiablePresentation'],
+        holder: holderDid,
+        verifiableCredential: selectedCredentials,
+        ...(verifierDid && { verifier: [verifierDid] })
+    };
 
-        const matches = sdr.claims.every(claim => {
-            if (!claim.isEssential) return true;
-            const hasType = subject[claim.claimType] !== undefined;
-            const actualValue = subject[claim.claimType];
-            const matchesValue = !claim.claimValue || actualValue === claim.claimValue;
-            const result = hasType && matchesValue;
-            console.log(`         ${claim.claimType}: has=${hasType}, value="${actualValue}", expected="${claim.claimValue || '*'}" → ${result ? '✓' : '✗'}`);
-            return result;
-        });
-        console.log(`      → ${matches ? '✅ MATCH' : '❌ NO MATCH'}`);
-        return matches;
-    });
-
-    if (selectedCredentials.length === 0) {
-        throw new Error('No credentials match the SDR');
-    }
-
-    console.log(`   Selected ${selectedCredentials.length} credential(s) for VP`);
-
-    // Step 2: Create VP with Veramo
-    try {
-        const presentationData = {
-            '@context': ['https://www.w3.org/2018/credentials/v1'],
-            type: ['VerifiablePresentation'],
-            holder: holderDid,
-            verifiableCredential: selectedCredentials
-        };
-
-        if (verifierDid) {
-            presentationData.verifier = [verifierDid];
-        }
-
-        const vp = await agent.createVerifiablePresentation({
-            presentation: presentationData,
-            proofFormat: 'jwt',
-            save: true
-        });
-
-        console.log('✅ VP created (SDR)');
-        return vp;
-
-    } catch (error) {
-        console.error('❌ Error creating VP:', error.message);
-        throw error;
-    }
+    const vp = await agent.createVerifiablePresentation({ presentation: presentationData, proofFormat: 'jwt', save: true });
+    console.log(`✅ VP created with ${selectedCredentials.length} credential(s)`);
+    return vp;
 }
 
-/**
- * Verify VP against SDR
- *
- * @param agent - Veramo agent instance
- * @param presentation - VP to verify
- * @param sdr - Expected SDR
- * @returns Verification result
- */
+/** Verify VP against SDR */
 async function verifyVPAgainstSDR(agent, presentation, sdr) {
-    console.log('🔍 Verifying VP against SDR');
-
     try {
-        // Step 1: Cryptographic verification with Veramo
-        console.log('   Step 1: Cryptographic verification...');
-        const cryptoResult = await agent.verifyPresentation({
-            presentation: presentation
-        });
-
+        // Step 1: Cryptographic verification
+        const cryptoResult = await agent.verifyPresentation({ presentation });
         if (!cryptoResult.verified) {
-            console.log('❌ Cryptographic verification failed');
-            return {
-                verified: false,
-                error: cryptoResult.error || { message: 'Signature verification failed' }
-            };
+            console.log('❌ VP crypto verification failed');
+            return { verified: false, error: cryptoResult.error || { message: 'Signature verification failed' } };
         }
-        console.log('   ✅ Cryptographic verification passed');
 
-        // Step 2: Check if credentials satisfy SDR claims
-        console.log('   Step 2: SDR claim validation...');
+        // Step 2: SDR claim validation
         const credentials = presentation.verifiableCredential || [];
+        const satisfiesSDR = credentials.some(cred => matchesSDR(cred.credentialSubject || {}, sdr));
 
-        const satisfiesSDR = credentials.some(cred => {
-            const subject = cred.credentialSubject || {};
-
-            return sdr.claims.every(claim => {
-                if (!claim.isEssential) return true;
-
-                const hasType = subject[claim.claimType] !== undefined;
-                const matchesValue = !claim.claimValue || subject[claim.claimType] === claim.claimValue;
-
-                return hasType && matchesValue;
-            });
-        });
-
-        if (satisfiesSDR) {
-            console.log('✅ VP satisfies SDR');
-            return { verified: true };
-        }
-
-        console.log('❌ VP does not satisfy SDR');
-        return {
-            verified: false,
-            error: { message: 'VP does not satisfy SDR claims' }
-        };
-
+        console.log(satisfiesSDR ? '✅ VP verified against SDR' : '❌ VP does not satisfy SDR');
+        return satisfiesSDR ? { verified: true } : { verified: false, error: { message: 'VP does not satisfy SDR claims' } };
     } catch (error) {
-        console.error('❌ Error verifying VP:', error.message);
-        return {
-            verified: false,
-            error: error
-        };
+        console.error('❌ VP verification error:', error.message);
+        return { verified: false, error };
     }
 }
 
-// Default export
-exports.default = {
-    createVPFromSDR,
-    verifyVPAgainstSDR,
-    selectCredentialsForSDR
-};
+exports.default = { createVPFromSDR, verifyVPAgainstSDR, selectCredentialsForSDR };

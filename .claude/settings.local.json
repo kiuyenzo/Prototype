@@ -56,7 +56,16 @@
       "Bash(grep:*)",
       "Bash(tree:*)",
       "Bash(wc:*)",
-      "Bash(xargs -I {} bash -c 'echo \"\"=== {} ===\"\" && grep \"\"require\\\\|import\"\" {} | head -5')"
+      "Bash(xargs -I {} bash -c 'echo \"\"=== {} ===\"\" && grep \"\"require\\\\|import\"\" {} | head -5')",
+      "Bash(chmod:*)",
+      "Bash(./tests/test-happy-path.sh:*)",
+      "Bash(./tests/test-e2e-simple.sh:*)",
+      "Bash(kind get clusters:*)",
+      "Bash(kubectl --context kind-cluster-a get pods:*)",
+      "Bash(kubectl --context kind-cluster-b get pods -n nf-b-namespace)",
+      "Bash(kubectl --context kind-cluster-a get svc -n nf-a-namespace -o wide)",
+      "Bash(find:*)",
+      "Bash(du:*)"
     ]
   }
 }
