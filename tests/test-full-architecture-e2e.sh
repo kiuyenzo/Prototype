@@ -184,7 +184,7 @@ section "Test 5: Verifiable Credentials"
 # Check credentials in NF-A
 kubectl config use-context kind-cluster-a > /dev/null 2>&1
 CREDS_A=$(kubectl exec -n nf-a-namespace $POD_A -c veramo-nf-a -- \
-    sqlite3 /app/cluster-a/database-nf-a.sqlite "SELECT COUNT(*) FROM credential" 2>/dev/null)
+    sqlite3 /app/data/db-nf-a/database-nf-a.sqlite "SELECT COUNT(*) FROM credential" 2>/dev/null)
 
 if [ "$CREDS_A" -gt 0 ]; then
     pass "NF-A has $CREDS_A credential(s)"
@@ -195,7 +195,7 @@ fi
 # Check credentials in NF-B
 kubectl config use-context kind-cluster-b > /dev/null 2>&1
 CREDS_B=$(kubectl exec -n nf-b-namespace $POD_B -c veramo-nf-b -- \
-    sqlite3 /app/cluster-b/database-nf-b.sqlite "SELECT COUNT(*) FROM credential" 2>/dev/null)
+    sqlite3 /app/data/db-nf-b/database-nf-b.sqlite "SELECT COUNT(*) FROM credential" 2>/dev/null)
 
 if [ "$CREDS_B" -gt 0 ]; then
     pass "NF-B has $CREDS_B credential(s)"
