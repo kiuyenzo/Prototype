@@ -18,8 +18,8 @@ BOLD='\033[1m'
 # Konfiguration
 NF_A_URL="http://localhost:30451"
 NF_B_URL="http://localhost:30452"
-DID_NF_A="did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
-DID_NF_B="did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"
+DID_NF_A="did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
+DID_NF_B="did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
 
 PASSED=0
 FAILED=0

@@ -35,7 +35,7 @@ NS_A="nf-a-namespace"
 NS_B="nf-b-namespace"
 CTX_A="kind-cluster-a"
 CTX_B="kind-cluster-b"
-DID_NF_B="did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"
+DID_NF_B="did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
 
 PASSED=0
 FAILED=0

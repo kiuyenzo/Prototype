@@ -29,7 +29,7 @@ spec:
             - name: NF_NAME
               value: "NF-A"
             - name: MY_DID
-              value: "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
+              value: "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
           readinessProbe:
             httpGet:
               path: /health
@@ -52,9 +52,9 @@ spec:
             - name: NF_PORT
               value: "3000"
             - name: MY_DID
-              value: "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
+              value: "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
             - name: OWN_DID
-              value: "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
+              value: "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
             - name: DB_PATH
               value: "/app/data/db-nf-a/database-nf-a.sqlite"
             - name: DB_ENCRYPTION_KEY

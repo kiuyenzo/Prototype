@@ -270,7 +270,7 @@ Resultat: Selbst NSA mit Zugriff auf Gateway kann nichts lesen! 🔒
 ┌─────────────────────────────────────────────────────────┐
 │ Dezentrale Identitäten (Kein Root CA!)                  │
 │                                                          │
-│  did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a│
+│  did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a│
 │       │                                                  │
 │       └──► Kein CA, NF-A kontrolliert direkt!          │
 │                                                          │
@@ -300,7 +300,7 @@ Resultat: Selbst NSA mit Zugriff auf Gateway kann nichts lesen! 🔒
 ```json
 {
   "@context": ["https://www.w3.org/ns/did/v1"],
-  "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+  "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a",
   "verificationMethod": [
     {
       "id": "did:web:...#authentication-key",
@@ -368,11 +368,11 @@ X.509 Certificate:
   "@context": ["https://www.w3.org/2018/credentials/v1"],
   "type": ["VerifiableCredential", "NetworkFunctionCredential"],
   "issuer": {
-    "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
+    "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
   },
   "issuanceDate": "2024-01-15T10:30:00Z",
   "credentialSubject": {
-    "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+    "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a",
     "role": "network-function",              ← Business Logic!
     "clusterId": "cluster-a",                ← Kontext!
     "status": "active",                       ← Status!

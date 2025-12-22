@@ -242,7 +242,7 @@ NF-A                    Envoy-A        Gateway-A      Gateway-B        Envoy-B  
 │                         DID Documents (GitHub Pages)                     │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
-│  did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a                │
+│  did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a                │
 │  ├── verificationMethod                                                  │
 │  │   ├── Ed25519VerificationKey2020  (Signing)                          │
 │  │   └── X25519KeyAgreementKey2020   (Encryption)                       │
@@ -251,13 +251,13 @@ NF-A                    Envoy-A        Gateway-A      Gateway-B        Envoy-B  
 │  └── service                                                             │
 │      └── DIDCommMessaging → endpoint                                     │
 │                                                                          │
-│  did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b                │
+│  did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b                │
 │  └── (gleiche Struktur)                                                  │
 │                                                                          │
-│  did:web:kiuyenzo.github.io:Prototype:cluster-a:did-issuer-a            │
+│  did:web:kiuyenzo.github.io:Prototype:dids:did-issuer            │
 │  └── Issuer für Cluster-A Credentials                                    │
 │                                                                          │
-│  did:web:kiuyenzo.github.io:Prototype:cluster-b:did-issuer-b            │
+│  did:web:kiuyenzo.github.io:Prototype:dids:did-issuer            │
 │  └── Issuer für Cluster-B Credentials                                    │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘

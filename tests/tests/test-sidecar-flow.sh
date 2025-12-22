@@ -85,7 +85,7 @@ RESPONSE=$(kubectl exec -n nf-a-namespace $NF_A_POD -c nf-service -- curl -s -X 
   http://localhost:3000/request \
   -H "Content-Type: application/json" \
   -d '{
-    "targetDid": "did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b",
+    "targetDid": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b",
     "service": "nf-info",
     "action": "get"
   }' 2>/dev/null)

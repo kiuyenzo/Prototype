@@ -167,11 +167,11 @@ kubectl config use-context kind-cluster-a > /dev/null 2>&1
 
 # Test DID resolution via wget (simulates Veramo resolving DID)
 DID_DOC_B=$(kubectl exec -n nf-a-namespace $POD_A -c veramo-nf-a -- wget -q -O- \
-    https://kiuyenzo.github.io/Prototype/cluster-b/did-nf-b/did.json 2>/dev/null | head -c 100)
+    https://kiuyenzo.github.io/Prototype/dids/did-nf-b/did.json 2>/dev/null | head -c 100)
 
 if [ -n "$DID_DOC_B" ]; then
     pass "DID Document of NF-B resolved successfully"
-    info "DID: did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"
+    info "DID: did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
 else
     fail "Failed to resolve DID Document of NF-B"
 fi
@@ -289,7 +289,7 @@ kubectl config use-context kind-cluster-a > /dev/null 2>&1
 
 # Initiate VP-Flow (simulates NF_A requesting service from NF_B)
 RESPONSE=$(kubectl exec -n nf-a-namespace $POD_A -c veramo-nf-a -- \
-    wget --timeout=15 -q -O- --post-data='{"targetDid":"did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"}' \
+    wget --timeout=15 -q -O- --post-data='{"targetDid":"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"}' \
     --header='Content-Type: application/json' \
     http://localhost:3000/didcomm/initiate-auth 2>/dev/null || echo '{"error":"timeout"}')
 
@@ -455,7 +455,7 @@ sleep 2
 
 # Initiate VP-Flow from NF-B to NF-A (reverse direction)
 RESPONSE_REVERSE=$(kubectl exec -n nf-b-namespace $POD_B -c veramo-nf-b -- \
-    wget --timeout=15 -q -O- --post-data='{"targetDid":"did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"}' \
+    wget --timeout=15 -q -O- --post-data='{"targetDid":"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"}' \
     --header='Content-Type: application/json' \
     http://localhost:3001/didcomm/initiate-auth 2>/dev/null || echo '{"error":"timeout"}')
 

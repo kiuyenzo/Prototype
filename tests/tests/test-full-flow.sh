@@ -80,7 +80,7 @@ echo ""
 
 # Send request - this triggers Phase 1-3
 kubectl config use-context kind-cluster-a > /dev/null 2>&1
-RESPONSE=$(kubectl exec -n nf-a-namespace $NF_A_POD -c nf-service -- curl -s -X POST http://localhost:3000/request -H "Content-Type: application/json" -d "{\"targetDid\":\"did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b\",\"service\":\"nf-info\",\"action\":\"get\"}" 2>/dev/null)
+RESPONSE=$(kubectl exec -n nf-a-namespace $NF_A_POD -c nf-service -- curl -s -X POST http://localhost:3000/request -H "Content-Type: application/json" -d "{\"targetDid\":\"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b\",\"service\":\"nf-info\",\"action\":\"get\"}" 2>/dev/null)
 
 echo "Response: $RESPONSE"
 echo ""
@@ -163,8 +163,8 @@ kubectl --context kind-cluster-b exec -n nf-b-namespace $NF_B_POD -c veramo-side
 
 # Remove peer VCs (redundant - already in VP)
 echo "🧹 Removing peer VCs (redundant)..."
-sqlite3 "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a';" 2>/dev/null
-sqlite3 "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b';" 2>/dev/null
+sqlite3 "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a';" 2>/dev/null
+sqlite3 "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b';" 2>/dev/null
 
 echo "✅ data/db-nf-a/database-nf-a.sqlite"
 echo "✅ data/db-nf-b/database-nf-b.sqlite"

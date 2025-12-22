@@ -40,7 +40,7 @@ const VERAMO_PORT = process.env.VERAMO_PORT || 3001, NF_PORT = process.env.NF_PO
 const MY_DID = process.env.MY_DID || '', PACKING_MODE = process.env.DIDCOMM_PACKING_MODE || 'encrypted';
 const isNFA = MY_DID.includes('nf-a');
 const MY_PD = isNFA ? pex_definitions_js_1.PRESENTATION_DEFINITION_A : pex_definitions_js_1.PRESENTATION_DEFINITION_B;
-const THEIR_DID = isNFA ? 'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b' : 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a';
+const THEIR_DID = isNFA ? 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b' : 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a';
 let agent, wrapper, sessionManager;
 // Pending service requests waiting for authentication
 const pendingServiceRequests = new Map();

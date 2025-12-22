@@ -3,14 +3,14 @@ export const CONFIG = {
   'nf-a': {
     db: './data/db-nf-a/database-nf-a.sqlite',
     key: 'ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6',
-    did: 'did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a',
+    did: 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a',
     cluster: 'cluster-a',
     enc: true
   },
   'nf-b': {
     db: './data/db-nf-b/database-nf-b.sqlite',
     key: '3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d',
-    did: 'did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b',
+    did: 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b',
     cluster: 'cluster-b',
     enc: true
   },

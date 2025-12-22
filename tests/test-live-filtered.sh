@@ -18,7 +18,7 @@ DIM='\033[2m'
 # Konfiguration
 NF_A_URL="http://localhost:30451"
 NF_B_URL="http://localhost:30452"
-DID_NF_B="did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"
+DID_NF_B="did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
 
 # Filter pattern for important messages
 FILTER='Phase|VP|Sending|Received|encrypted|verified|authenticated|Session|SERVICE|Error|error|Creating|Resolve|DID|Fetching|did.json'

@@ -18,8 +18,8 @@ BOLD='\033[1m'
 # Konfiguration - interne URLs
 VERAMO_A_URL="http://veramo-nf-a.nf-a-namespace.svc.cluster.local:3001"
 VERAMO_B_URL="http://veramo-nf-b.nf-b-namespace.svc.cluster.local:3001"
-DID_NF_A="did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a"
-DID_NF_B="did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"
+DID_NF_A="did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
+DID_NF_B="did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
 
 PASSED=0
 FAILED=0

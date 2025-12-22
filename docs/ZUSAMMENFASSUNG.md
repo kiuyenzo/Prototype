@@ -109,7 +109,7 @@ Dein Prototyp hat **4 Sicherheitsschichten** (Defense in Depth):
 ### 🆔 did:web
 - DID-Methode basierend auf Webdomains
 - Deine DIDs liegen auf GitHub Pages
-- Beispiel: `did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a`
+- Beispiel: `did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a`
 
 ## Projekt-Struktur
 
@@ -201,11 +201,11 @@ Das Script macht automatisch:
 
 ### DID-Struktur
 ```
-NF-A: did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
-NF-B: did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b
+NF-A: did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+NF-B: did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
 
 DID Document URL:
-https://kiuyenzo.github.io/Prototype/cluster-a/did-nf-a/did.json
+https://kiuyenzo.github.io/Prototype/dids/did-nf-a/did.json
 ```
 
 ### NetworkFunctionCredential

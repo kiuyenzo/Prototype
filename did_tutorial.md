@@ -18,7 +18,7 @@ const encryptionKey = await agent.keyManagerCreate({
 Das did.json wurde dann manuell mit den Public Keys erstellt:
 
 {
-  "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+  "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a",
   "verificationMethod": [
     {
       "type": "EcdsaSecp256k1VerificationKey2019",  // Signing
@@ -36,8 +36,8 @@ Das did.json wurde dann manuell mit den Public Keys erstellt:
 }
 3. Auf GitHub Pages hosten
 
-did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a
+did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
            │                  │          │        │
            └──────────────────┴──────────┴────────┘
                               ↓
-https://kiuyenzo.github.io/Prototype/cluster-a/did-nf-a/did.json
+https://kiuyenzo.github.io/Prototype/dids/did-nf-a/did.json

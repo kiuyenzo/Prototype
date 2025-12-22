@@ -29,7 +29,7 @@ echo ""
 echo "=== 🔐 Test 2: Initiate Auth (A → B) ==="
 kubectl config use-context kind-cluster-a > /dev/null 2>&1
 
-TARGET_DID_B="did:web:kiuyenzo.github.io:Prototype:cluster-b:did-nf-b"
+TARGET_DID_B="did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
 echo "Initiating VP-Flow to: $TARGET_DID_B"
 
 RESPONSE=$(kubectl exec -n nf-a-namespace $POD_A -c veramo-nf-a -- sh -c "

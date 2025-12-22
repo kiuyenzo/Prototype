@@ -4,33 +4,33 @@
         "https://w3id.org/security/suites/jws-2020/v1",
         "https://w3id.org/security/suites/x25519-2020/v1"
     ],
-    "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+    "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a",
     "verificationMethod": [
         {
-            "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-1",
+            "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a#key-1",
             "type": "EcdsaSecp256k1VerificationKey2019",
-            "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+            "controller": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a",
             "publicKeyHex": "042ac10aa2be6b0e903bed2886ac45fccccfd95a87f52a84de55156b142809df4d943435eabf5e13480767b55c4e5d43d874dff20c6271b928430cb9a939bc247f"
         },
         {
-            "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-2",
+            "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a#key-2",
             "type": "X25519KeyAgreementKey2019",
-            "controller": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a",
+            "controller": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a",
             "publicKeyHex": "0edd35c82d30913dba7229322d45fff1c148840d65cfb629467be4d3fbf8d31a"
         }
     ],
     "authentication": [
-        "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-1"
+        "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a#key-1"
     ],
     "assertionMethod": [
-        "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-1"
+        "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a#key-1"
     ],
     "keyAgreement": [
-        "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#key-2"
+        "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a#key-2"
     ],
     "service": [
         {
-            "id": "did:web:kiuyenzo.github.io:Prototype:cluster-a:did-nf-a#didcomm-1",
+            "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a#didcomm-1",
             "type": "DIDCommMessaging",
             "serviceEndpoint": "http://172.23.0.2:32147"
         }
