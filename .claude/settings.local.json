@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kubectl config get-contexts:*)",
+      "Bash(kind get clusters:*)",
+      "Bash(kubectl --context kind-cluster-b get svc:*)",
+      "Bash(kubectl:*)",
+      "Bash(curl:*)",
+      "Bash(./scripts/deploy/build-and-deploy.sh:*)",
+      "Bash(docker tag:*)",
+      "Bash(kind load docker-image:*)",
+      "Bash(grep -A10 \"cluster-b-gateway\" echo \"\" echo \"Cluster-B Gateway IP:\" kubectl --context kind-cluster-b get nodes -o jsonpath='{.items[0].status.addresses[?\\(@.type==\"\"InternalIP\"\"\\)].address}' echo \"\" echo \"Cluster-B Gateway Port:\" kubectl --context kind-cluster-b get svc -n istio-system istio-ingressgateway -o jsonpath='{.spec.ports[?\\(@.name==\"\"http2\"\"\\)].nodePort}')",
+      "Bash(grep control-plane echo \"\" echo \"ServiceEntry in Cluster-A:\" kubectl --context kind-cluster-a get serviceentry -n nf-a-namespace)",
+      "Bash(__NEW_LINE__ echo \"✅ ServiceEntry patched\")",
+      "Bash(docker build:*)",
+      "Bash(./tests/tests/test-full-flow.sh:*)"
+    ]
+  }
+}
