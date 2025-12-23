@@ -32,7 +32,7 @@
         {
             "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a#didcomm-1",
             "type": "DIDCommMessaging",
-            "serviceEndpoint": "http://172.23.0.3:32514/didcomm"
+            "serviceEndpoint": "http://172.23.0.3:32514/didcomm/receive"
         }
     ]
 }
