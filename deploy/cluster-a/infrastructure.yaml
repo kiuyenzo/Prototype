@@ -43,7 +43,7 @@ metadata:
   namespace: nf-b-namespace
 subsets:
 - addresses:
-  - ip: 172.23.0.3  # Cluster-B control-plane IP
+  - ip: 172.23.0.2  # Cluster-B control-plane IP
   ports:
   - port: 31696    # Cluster-B Ingress Gateway NodePort
     name: http-veramo
@@ -69,7 +69,7 @@ spec:
   location: MESH_EXTERNAL
   resolution: STATIC
   endpoints:
-  - address: 172.23.0.3  # Cluster-B control-plane IP
+  - address: 172.23.0.2  # Cluster-B control-plane IP
     ports:
       http-veramo: 31696  # Cluster-B Ingress Gateway NodePort
 
@@ -91,35 +91,3 @@ spec:
       http:
         h2UpgradePolicy: UPGRADE
 
----
-# =============================================================================
-# ServiceEntry: Allow egress to GitHub Pages for DID resolution
-# =============================================================================
-apiVersion: networking.istio.io/v1
-kind: ServiceEntry
-metadata:
-  name: github-pages
-  namespace: nf-a-namespace
-spec:
-  hosts:
-  - kiuyenzo.github.io
-  ports:
-  - number: 443
-    name: https
-    protocol: TLS
-  resolution: DNS
-  location: MESH_EXTERNAL
-
----
-# DestinationRule for TLS to GitHub Pages (originate TLS)
-apiVersion: networking.istio.io/v1
-kind: DestinationRule
-metadata:
-  name: github-pages-tls
-  namespace: nf-a-namespace
-spec:
-  host: kiuyenzo.github.io
-  trafficPolicy:
-    tls:
-      mode: SIMPLE
-      sni: kiuyenzo.github.io

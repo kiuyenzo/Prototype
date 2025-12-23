@@ -40,7 +40,8 @@
       "Bash(docker volume:*)",
       "Bash(docker ps:*)",
       "Bash(docker exec:*)",
-      "Bash(pgrep:*)"
+      "Bash(pgrep:*)",
+      "Bash(__NEW_LINE__ echo \"\")"
     ]
   }
 }

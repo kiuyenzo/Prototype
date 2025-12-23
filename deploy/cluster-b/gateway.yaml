@@ -111,7 +111,7 @@ spec:
   hosts:
   - cluster-a.external
   addresses:
-  - 172.23.0.2
+  - 172.23.0.3
   ports:
   - number: 32514
     name: http-didcomm
@@ -122,7 +122,7 @@ spec:
   location: MESH_EXTERNAL
   resolution: STATIC
   endpoints:
-  - address: 172.23.0.2
+  - address: 172.23.0.3
     ports:
       http-didcomm: 32514
       https-didcomm: 32236

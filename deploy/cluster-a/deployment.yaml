@@ -30,7 +30,12 @@ spec:
               value: "NF-A"
             - name: MY_DID
               value: "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
-          # No readinessProbe - NF service binds to localhost only (authorization enforcement)
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
 
         # Container 2: Veramo Sidecar (DIDComm Handler)
         - name: veramo-sidecar
@@ -75,8 +80,11 @@ spec:
   selector:
     app: nf-a
   ports:
-    # Veramo sidecar port (DIDComm endpoint) - only port exposed
-    # NF service (port 3000) binds to localhost only, enforcing authorization via Veramo
+    # Veramo sidecar port (DIDComm endpoint)
     - port: 3001
       targetPort: 3001
       name: veramo-http
+    # NF service port (optional external access)
+    - port: 3000
+      targetPort: 3000
+      name: nf-http
