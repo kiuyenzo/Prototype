@@ -276,8 +276,8 @@ function createHTTPServer() {
  */
 async function main() {
     const server = createHTTPServer();
-    server.listen(NF_PORT, () => {
-        console.log(`🚀 NF Service running on :${NF_PORT} [${NF_NAME}]`);
+    server.listen(NF_PORT, '127.0.0.1', () => {
+        console.log(`🚀 NF Service running on localhost:${NF_PORT} [${NF_NAME}]`);
     });
 }
 main().catch((error) => {

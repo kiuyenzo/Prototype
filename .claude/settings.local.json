@@ -39,7 +39,8 @@
       "Bash(python3:*)",
       "Bash(docker volume:*)",
       "Bash(docker ps:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(pgrep:*)"
     ]
   }
 }
