@@ -60,7 +60,7 @@ spec:
             - name: DB_ENCRYPTION_KEY
               value: "3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d"
             - name: DIDCOMM_PACKING_MODE
-              value: "signed"  # V4a: signed (JWS) + mTLS STRICT
+              value: "encrypted"  # V1: E2E encrypted DIDComm
           readinessProbe:
             httpGet:
               path: /health

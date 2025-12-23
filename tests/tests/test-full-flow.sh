@@ -58,7 +58,7 @@ kubectl wait --for=condition=ready pod/$NF_B_POD -n nf-b-namespace --timeout=60s
 
 # Copy reset DBs to local Veramo Explorer (so it's also reset)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 echo "📦 Copying reset DBs to local Veramo Explorer..."
 rm -f "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite"
 kubectl --context kind-cluster-a exec -n nf-a-namespace $NF_A_POD -c veramo-sidecar -- cat /app/data/db-nf-a/database-nf-a.sqlite > "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" 2>/dev/null
@@ -161,10 +161,16 @@ rm -f "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "$PROJECT_DIR/data/db-nf-
 kubectl --context kind-cluster-a exec -n nf-a-namespace $NF_A_POD -c veramo-sidecar -- cat /app/data/db-nf-a/database-nf-a.sqlite > "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" 2>/dev/null
 kubectl --context kind-cluster-b exec -n nf-b-namespace $NF_B_POD -c veramo-sidecar -- cat /app/data/db-nf-b/database-nf-b.sqlite > "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite" 2>/dev/null
 
-# Remove peer VCs (redundant - already in VP)
-echo "🧹 Removing peer VCs (redundant)..."
+# Remove peer VCs and peer VPs (redundant - already in DIDComm messages)
+echo "🧹 Removing peer VCs and VPs (redundant)..."
 sqlite3 "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a';" 2>/dev/null
 sqlite3 "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') <> 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b';" 2>/dev/null
+sqlite3 "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "DELETE FROM presentation WHERE holderDid <> 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a';" 2>/dev/null
+sqlite3 "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite" "DELETE FROM presentation WHERE holderDid <> 'did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b';" 2>/dev/null
+
+# Fix presentation IDs for Veramo Explorer
+sqlite3 "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "UPDATE presentation SET id = hash WHERE id IS NULL OR id = '';" 2>/dev/null
+sqlite3 "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite" "UPDATE presentation SET id = hash WHERE id IS NULL OR id = '';" 2>/dev/null
 
 echo "✅ data/db-nf-a/database-nf-a.sqlite"
 echo "✅ data/db-nf-b/database-nf-b.sqlite"

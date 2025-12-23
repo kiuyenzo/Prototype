@@ -1,27 +1,31 @@
 #!/bin/bash
-# Reset Veramo database on pod startup
+# Reset Veramo databases locally
 # Keeps: DID, Keys, own VC
 # Deletes: VPs, Messages, Peer VCs
 
-DB_PATH="${DB_PATH:-/app/database.sqlite}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-if [ -f "$DB_PATH" ]; then
-    echo "🧹 Resetting database: $DB_PATH"
+# Database paths
+DBS=(
+    "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite:did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a"
+    "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite:did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
+    "$PROJECT_DIR/data/db-issuer/database-issuer.sqlite:did:web:kiuyenzo.github.io:Prototype:dids:did-issuer"
+)
 
-    # Get own DID from environment or detect from DB
-    OWN_DID="${OWN_DID:-}"
+for entry in "${DBS[@]}"; do
+    DB_PATH="${entry%%:*}"
+    OWN_DID="${entry#*:}"
 
-    if [ -n "$OWN_DID" ]; then
-        sqlite3 "$DB_PATH" "DELETE FROM presentation;"
-        sqlite3 "$DB_PATH" "DELETE FROM message;"
-        sqlite3 "$DB_PATH" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') != '$OWN_DID';"
-        echo "✅ Database reset complete"
+    if [ -f "$DB_PATH" ]; then
+        echo "🧹 Resetting: $(basename "$DB_PATH")"
+        sqlite3 "$DB_PATH" "DELETE FROM presentation;" 2>/dev/null
+        sqlite3 "$DB_PATH" "DELETE FROM message;" 2>/dev/null
+        sqlite3 "$DB_PATH" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') != '$OWN_DID';" 2>/dev/null
+        echo "   ✅ Done"
     else
-        echo "⚠️ OWN_DID not set, skipping credential cleanup"
-        sqlite3 "$DB_PATH" "DELETE FROM presentation;"
-        sqlite3 "$DB_PATH" "DELETE FROM message;"
-        echo "✅ Presentations and messages cleared"
+        echo "ℹ️ Not found: $DB_PATH"
     fi
-else
-    echo "ℹ️ No database found at $DB_PATH, skipping reset"
-fi
+done
+
+echo "✅ All databases reset"

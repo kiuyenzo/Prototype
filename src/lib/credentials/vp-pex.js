@@ -111,10 +111,39 @@ async function createVPFromPD(agent, holderDid, availableCredentials, presentati
         const vp = await agent.createVerifiablePresentation({
             presentation: presentationData,
             proofFormat: 'jwt',
-            save: true  // Save VP to database for veramo explore
+            save: false  // Disabled - using direct DB save to avoid claim constraint issues
         });
 
-        console.log('✅ VP created and saved to database (PEX)');
+        // Save VP directly to presentation table using sqlite3
+        try {
+            const dbPath = process.env.DB_PATH;
+            if (dbPath) {
+                const { spawnSync } = require('child_process');
+                const fs = require('fs');
+                const os = require('os');
+                const path = require('path');
+
+                const hash = require('crypto').createHash('sha256').update(JSON.stringify(vp)).digest('hex').substring(0, 46);
+                const context = JSON.stringify(vp['@context'] || ['https://www.w3.org/2018/credentials/v1']).replace(/'/g, "''");
+                const type = JSON.stringify(vp.type || ['VerifiablePresentation']).replace(/'/g, "''");
+                const raw = JSON.stringify(vp).replace(/'/g, "''");
+
+                const sql = `INSERT OR REPLACE INTO presentation (hash, raw, id, context, type, holderDid, issuanceDate) VALUES ('${hash}', '${raw}', '${vp.id || hash}', '${context}', '${type}', '${holderDid}', datetime('now'));`;
+
+                // Write SQL to temp file to avoid shell escaping issues
+                const tmpFile = path.join(os.tmpdir(), `vp-save-${Date.now()}.sql`);
+                fs.writeFileSync(tmpFile, sql);
+                spawnSync('sqlite3', [dbPath, `.read ${tmpFile}`], { stdio: 'inherit' });
+                fs.unlinkSync(tmpFile);
+                console.log('   ✅ VP saved to database');
+            } else {
+                console.log('   ⚠️  No DB_PATH for VP save');
+            }
+        } catch (saveErr) {
+            console.log(`   ⚠️  VP not saved: ${saveErr.message}`);
+        }
+
+        console.log('✅ VP created (PEX)');
         return vp;
     } catch (error) {
         console.error('❌ Error creating VP:', error.message);

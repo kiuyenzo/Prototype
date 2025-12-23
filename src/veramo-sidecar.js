@@ -30,7 +30,17 @@ const session_manager_js_1 = require("./lib/session/manager.js");
 const pex_definitions_js_1 = require("./lib/credentials/vp_definitions.js"); // PEX (@sphereon/pex)
 // Inline DIDComm encryption (replaces encryption.js)
 const packMode = () => ({ encrypted: 'authcrypt', anon: 'anoncrypt', signed: 'jws' }[process.env.DIDCOMM_PACKING_MODE] || 'authcrypt');
-const packMsg = async (a, m, to, from) => { try { return (await a.packDIDCommMessage({ packing: packMode(), message: { ...m, from, to: [to] } })).message; } catch { return JSON.stringify(m); } };
+const packMsg = async (a, m, to, from) => {
+    try {
+        console.log(`📦 Packing: mode=${packMode()}, from=${from}, to=${to}`);
+        const packed = await a.packDIDCommMessage({ packing: packMode(), message: { ...m, from, to: [to] } });
+        console.log(`✅ Packed successfully, length=${packed.message.length}`);
+        return packed.message;
+    } catch (e) {
+        console.log(`❌ Pack failed: ${e.message}`);
+        return JSON.stringify(m);
+    }
+};
 const unpackMsg = async (a, p) => (await a.unpackDIDCommMessage({ message: p })).message;
 
 // Configuration
@@ -149,7 +159,8 @@ async function sendResponseToNF(data) {
 /** Send DIDComm message via Istio mesh or Docker Compose */
 async function sendDIDCommMessage(message, targetDid) {
     const USE_K8S = process.env.USE_KUBERNETES === 'true';
-    const targetIsA = targetDid.includes('cluster-a');
+    // Updated for new DID format: dids:did-nf-a / dids:did-nf-b
+    const targetIsA = targetDid.includes('did-nf-a');
     const targetHost = targetIsA ? 'veramo-nf-a.nf-a-namespace.svc.cluster.local' : 'veramo-nf-b.nf-b-namespace.svc.cluster.local';
     const targetUrl = USE_K8S
         ? `http://${targetHost}:3001/didcomm/send`
@@ -185,8 +196,21 @@ async function sendDIDCommMessage(message, targetDid) {
 }
 /** Handle incoming DIDComm message from Envoy */
 async function handleIncomingMessage(messageOrEncrypted) {
-    const message = (messageOrEncrypted.packed || messageOrEncrypted.encrypted) && messageOrEncrypted.message
-        ? await unpackMsg(agent, messageOrEncrypted.message) : messageOrEncrypted;
+    console.log(`🔍 Incoming: packed=${messageOrEncrypted.packed}, mode=${messageOrEncrypted.mode}, msgLen=${messageOrEncrypted.message?.length || 'N/A'}`);
+    let message;
+    try {
+        if ((messageOrEncrypted.packed || messageOrEncrypted.encrypted) && messageOrEncrypted.message) {
+            console.log(`🔐 Unpacking message...`);
+            message = await unpackMsg(agent, messageOrEncrypted.message);
+            console.log(`✅ Unpacked: type=${message.type}`);
+        } else {
+            message = messageOrEncrypted;
+        }
+    } catch (unpackError) {
+        console.log(`❌ Unpack failed: ${unpackError.message}`);
+        console.log(`📦 Raw: ${messageOrEncrypted.message?.substring(0, 300)}`);
+        throw unpackError;
+    }
     console.log(`📨 ${message.type.split('/').pop()} from ${message.from?.split(':').pop()}`);
     try { await agent.dataStoreSaveMessage({ message: { id: message.id || `msg-${Date.now()}`, type: message.type, from: message.from, to: message.to?.[0] || MY_DID, createdAt: new Date().toISOString(), data: message.body } }); } catch (e) { /* ignore */ }
     const credentials = await loadCredentials();
