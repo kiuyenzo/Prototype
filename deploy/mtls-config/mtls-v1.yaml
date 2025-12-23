@@ -1,9 +1,21 @@
-# Istio mTLS Configuration for V1 (encrypted DIDComm)
-# Pod ↔ Gateway: TCP (plain) - DIDComm is already E2E encrypted
-# Gateway ↔ Gateway: mTLS
+# =============================================================================
+# V1: TCP intern + DIDComm(encrypted E2E NF-NF)
+# =============================================================================
+# (nf, agent, proxy) ←TCP+DIDComm(enc)→ Gateway ←mTLS+DIDComm(enc)→ Gateway
+#
+# - Cluster-intern: TCP (kein mTLS) - DestinationRule DISABLE
+# - Zwischen Gateways: mTLS
+# - DIDComm: authcrypt (E2E verschlüsselt)
+#
+# Anwenden:
+#   kubectl apply -f deploy/mtls-config/mtls-v1.yaml --context kind-cluster-a
+#   kubectl apply -f deploy/mtls-config/mtls-v1.yaml --context kind-cluster-b
+#
+# DIDCOMM_PACKING_MODE muss auf "encrypted" stehen (default)
+# =============================================================================
 
 ---
-# Disable mTLS for Pod-to-Gateway traffic in Cluster-A
+# Cluster-A: PERMISSIVE allows both plain TCP and mTLS
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -11,10 +23,23 @@ metadata:
   namespace: nf-a-namespace
 spec:
   mtls:
-    mode: PERMISSIVE  # Accept both plain and mTLS (allows plain HTTP from pods)
+    mode: PERMISSIVE  # V1: Akzeptiert TCP und mTLS
 
 ---
-# Disable mTLS for Pod-to-Gateway traffic in Cluster-B
+# Cluster-A: Disable mTLS for internal service communication (force TCP)
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: internal-tcp-mode
+  namespace: nf-a-namespace
+spec:
+  host: "*.nf-a-namespace.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE  # V1: Force TCP (no mTLS) internally
+
+---
+# Cluster-B: PERMISSIVE allows both plain TCP and mTLS
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -22,4 +47,17 @@ metadata:
   namespace: nf-b-namespace
 spec:
   mtls:
-    mode: PERMISSIVE  # Accept both plain and mTLS (allows plain HTTP from pods)
+    mode: PERMISSIVE  # V1: Akzeptiert TCP und mTLS
+
+---
+# Cluster-B: Disable mTLS for internal service communication (force TCP)
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: internal-tcp-mode
+  namespace: nf-b-namespace
+spec:
+  host: "*.nf-b-namespace.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE  # V1: Force TCP (no mTLS) internally

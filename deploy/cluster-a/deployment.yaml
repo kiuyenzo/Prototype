@@ -60,7 +60,7 @@ spec:
             - name: DB_ENCRYPTION_KEY
               value: "ed9733675a04a20b91c5beb2196a6c964dce7d520a77be577a8a605911232ba6"
             - name: DIDCOMM_PACKING_MODE
-              value: "encrypted"  # V1: E2E encrypted DIDComm
+              value: "encrypted"  # V1: E2E encrypted DIDComm (authcrypt)
           readinessProbe:
             httpGet:
               path: /health

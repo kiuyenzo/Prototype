@@ -29,7 +29,7 @@ const didcomm_messages_js_1 = require("./lib/didcomm/messages.js");
 const session_manager_js_1 = require("./lib/session/manager.js");
 const pex_definitions_js_1 = require("./lib/credentials/vp_definitions.js"); // PEX (@sphereon/pex)
 // Inline DIDComm encryption (replaces encryption.js)
-const packMode = () => ({ encrypted: 'authcrypt', anon: 'anoncrypt', signed: 'jws' }[process.env.DIDCOMM_PACKING_MODE] || 'authcrypt');
+const packMode = () => ({ encrypted: 'authcrypt', anon: 'anoncrypt', signed: 'jws', none: 'none' }[process.env.DIDCOMM_PACKING_MODE] || 'authcrypt');
 const packMsg = async (a, m, to, from) => {
     try {
         console.log(`📦 Packing: mode=${packMode()}, from=${from}, to=${to}`);

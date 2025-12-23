@@ -1,9 +1,21 @@
-# Istio mTLS Configuration for V4a (signed DIDComm - unencrypted)
-# Pod ↔ Gateway: mTLS - Required for confidentiality
-# Gateway ↔ Gateway: mTLS
+# =============================================================================
+# V4a: mTLS intern + DIDComm(unencrypted)
+# =============================================================================
+# (nf, agent, proxy) ←mTLS+DIDComm(unenc)→ Gateway ←mTLS+DIDComm(unenc)→ Gateway
+#
+# - Cluster-intern: mTLS (STRICT)
+# - Zwischen Gateways: mTLS
+# - DIDComm: signed/JWS (nicht verschlüsselt, aber Integrität+Authentizität)
+#
+# Anwenden:
+#   kubectl apply -f deploy/mtls-config/mtls-v4a.yaml --context kind-cluster-a
+#   kubectl apply -f deploy/mtls-config/mtls-v4a.yaml --context kind-cluster-b
+#
+# DIDCOMM_PACKING_MODE muss auf "signed" stehen!
+# =============================================================================
 
 ---
-# Enforce mTLS for all traffic in Cluster-A
+# Enforce mTLS inside Cluster-A
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -11,10 +23,10 @@ metadata:
   namespace: nf-a-namespace
 spec:
   mtls:
-    mode: STRICT  # Require mTLS for all traffic
+    mode: STRICT  # V4a: mTLS intern
 
 ---
-# Enforce mTLS for all traffic in Cluster-B
+# Enforce mTLS inside Cluster-B
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -22,4 +34,4 @@ metadata:
   namespace: nf-b-namespace
 spec:
   mtls:
-    mode: STRICT  # Require mTLS for all traffic
+    mode: STRICT  # V4a: mTLS intern

@@ -15,6 +15,84 @@ const NF_NAME = process.env.NF_NAME || 'NF';
 const MY_DID = process.env.MY_DID || '';
 const isNFA = MY_DID.includes('nf-a');
 
+/**
+ * 5G UDM Subscriber Data (3GPP TS 29.503 - Nudm_SDM)
+ * NF-B acts as UDM providing subscriber data
+ */
+const subscriberDatabase = {
+    'imsi-262011234567890': {
+        supi: 'imsi-262011234567890',
+        gpsi: 'msisdn-491701234567',
+        subscriberName: 'Max Mustermann',
+        amData: {
+            gpsis: ['msisdn-491701234567'],
+            subscribedUeAmbr: { uplink: '100 Mbps', downlink: '200 Mbps' },
+            nssai: {
+                defaultSingleNssais: [
+                    { sst: 1, sd: '000001' },  // eMBB slice
+                    { sst: 2, sd: '000002' }   // URLLC slice
+                ],
+                singleNssais: [
+                    { sst: 1, sd: '000001' },
+                    { sst: 2, sd: '000002' },
+                    { sst: 3, sd: '000003' }   // MIoT slice
+                ]
+            },
+            ratRestrictions: ['NR', 'EUTRA'],
+            coreNetworkTypeRestrictions: ['5GC']
+        },
+        smfSelectionData: {
+            subscribedSnssaiInfos: {
+                '01-000001': { dnnInfos: [{ dnn: 'internet', defaultDnnIndicator: true }] },
+                '02-000002': { dnnInfos: [{ dnn: 'ims', defaultDnnIndicator: false }] }
+            }
+        },
+        authenticationData: {
+            authenticationMethod: '5G_AKA',
+            permanentKeyId: 'key-001'
+        }
+    },
+    'imsi-262019876543210': {
+        supi: 'imsi-262019876543210',
+        gpsi: 'msisdn-491709876543',
+        subscriberName: 'Erika Musterfrau',
+        amData: {
+            gpsis: ['msisdn-491709876543'],
+            subscribedUeAmbr: { uplink: '50 Mbps', downlink: '100 Mbps' },
+            nssai: {
+                defaultSingleNssais: [{ sst: 1, sd: '000001' }],
+                singleNssais: [{ sst: 1, sd: '000001' }]
+            },
+            ratRestrictions: ['NR'],
+            coreNetworkTypeRestrictions: ['5GC']
+        },
+        smfSelectionData: {
+            subscribedSnssaiInfos: {
+                '01-000001': { dnnInfos: [{ dnn: 'internet', defaultDnnIndicator: true }] }
+            }
+        },
+        authenticationData: {
+            authenticationMethod: '5G_AKA',
+            permanentKeyId: 'key-002'
+        }
+    }
+};
+
+/** Get UDM subscriber data by SUPI */
+const getSubscriberData = (supi, dataType) => {
+    const subscriber = subscriberDatabase[supi];
+    if (!subscriber) {
+        return { error: 'USER_NOT_FOUND', message: `Subscriber ${supi} not found` };
+    }
+    switch (dataType) {
+        case 'am-data': return subscriber.amData;
+        case 'smf-select-data': return subscriber.smfSelectionData;
+        case 'nssai': return subscriber.amData.nssai;
+        case 'all': return subscriber;
+        default: return subscriber.amData;
+    }
+};
+
 /** 5G NRF Discovery Response (3GPP TS 29.510) */
 const getNRFResponse = () => ({
     nfInstances: [{
@@ -47,6 +125,12 @@ function handleServiceRequest(service, action, params) {
         case 'nnrf-disc':
         case 'nf-discovery':
             return getNRFResponse();
+        case 'nudm-sdm':
+        case 'subscriber-data':
+            // 5G UDM Subscriber Data Query (3GPP TS 29.503)
+            const supi = params?.supi || 'imsi-262011234567890';
+            const dataType = params?.dataType || action || 'am-data';
+            return getSubscriberData(supi, dataType);
         default:
             throw new Error(`Unknown service: ${service}`);
     }
@@ -149,6 +233,37 @@ function createHTTPServer() {
         if (req.url?.startsWith('/nnrf-disc/v1/nf-instances') && req.method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(getNRFResponse()));
+            return;
+        }
+        // 5G UDM Subscriber Data Management REST Endpoints (3GPP TS 29.503 - Nudm_SDM)
+        // GET /nudm-sdm/v2/{supi}/am-data - Access and Mobility Subscription Data
+        // GET /nudm-sdm/v2/{supi}/smf-select-data - SMF Selection Subscription Data
+        // GET /nudm-sdm/v2/{supi}/nssai - Subscribed S-NSSAIs
+        const udmMatch = req.url?.match(/^\/nudm-sdm\/v2\/([^\/]+)\/(am-data|smf-select-data|nssai)$/);
+        if (udmMatch && req.method === 'GET') {
+            const [, supi, dataType] = udmMatch;
+            const data = getSubscriberData(supi, dataType);
+            if (data.error) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ status: 404, cause: data.error, detail: data.message }));
+            } else {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(data));
+            }
+            return;
+        }
+        // GET /nudm-sdm/v2/{supi} - All subscriber data
+        const udmAllMatch = req.url?.match(/^\/nudm-sdm\/v2\/([^\/]+)$/);
+        if (udmAllMatch && req.method === 'GET') {
+            const [, supi] = udmAllMatch;
+            const data = getSubscriberData(supi, 'all');
+            if (data.error) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ status: 404, cause: data.error, detail: data.message }));
+            } else {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(data));
+            }
             return;
         }
         // 404
