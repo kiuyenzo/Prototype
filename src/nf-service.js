@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 "use strict";
 /**
  * NF Service - Business Logic Container (Port 3000)
@@ -15,6 +15,10 @@ const NF_NAME = process.env.NF_NAME || 'NF';
 const MY_DID = process.env.MY_DID || '';
 const isNFA = MY_DID.includes('nf-a');
 
+// Baseline B: Direct NF-to-NF communication (no DIDComm, mTLS only)
+const BASELINE_TARGET_HOST = process.env.BASELINE_TARGET_HOST || (isNFA ? 'cluster-b.external' : 'cluster-a.external');
+const BASELINE_TARGET_PORT = process.env.BASELINE_TARGET_PORT || (isNFA ? '31696' : '31392');
+
 /**
  * 5G UDM Subscriber Data (3GPP TS 29.503 - Nudm_SDM)
  * NF-B acts as UDM providing subscriber data
@@ -29,13 +33,13 @@ const subscriberDatabase = {
             subscribedUeAmbr: { uplink: '100 Mbps', downlink: '200 Mbps' },
             nssai: {
                 defaultSingleNssais: [
-                    { sst: 1, sd: '000001' },  // eMBB slice
-                    { sst: 2, sd: '000002' }   // URLLC slice
+                    { sst: 1, sd: '000001' },
+                    { sst: 2, sd: '000002' }
                 ],
                 singleNssais: [
                     { sst: 1, sd: '000001' },
                     { sst: 2, sd: '000002' },
-                    { sst: 3, sd: '000003' }   // MIoT slice
+                    { sst: 3, sd: '000003' }
                 ]
             },
             ratRestrictions: ['NR', 'EUTRA'],
@@ -50,30 +54,6 @@ const subscriberDatabase = {
         authenticationData: {
             authenticationMethod: '5G_AKA',
             permanentKeyId: 'key-001'
-        }
-    },
-    'imsi-262019876543210': {
-        supi: 'imsi-262019876543210',
-        gpsi: 'msisdn-491709876543',
-        subscriberName: 'Erika Musterfrau',
-        amData: {
-            gpsis: ['msisdn-491709876543'],
-            subscribedUeAmbr: { uplink: '50 Mbps', downlink: '100 Mbps' },
-            nssai: {
-                defaultSingleNssais: [{ sst: 1, sd: '000001' }],
-                singleNssais: [{ sst: 1, sd: '000001' }]
-            },
-            ratRestrictions: ['NR'],
-            coreNetworkTypeRestrictions: ['5GC']
-        },
-        smfSelectionData: {
-            subscribedSnssaiInfos: {
-                '01-000001': { dnnInfos: [{ dnn: 'internet', defaultDnnIndicator: true }] }
-            }
-        },
-        authenticationData: {
-            authenticationMethod: '5G_AKA',
-            permanentKeyId: 'key-002'
         }
     }
 };
@@ -93,49 +73,70 @@ const getSubscriberData = (supi, dataType) => {
     }
 };
 
-/** 5G NRF Discovery Response (3GPP TS 29.510) */
-const getNRFResponse = () => ({
-    nfInstances: [{
-        nfInstanceId: isNFA ? 'nf-a-instance-001' : 'nf-b-instance-001',
-        nfType: isNFA ? 'AMF' : 'SMF', nfStatus: 'REGISTERED', heartBeatTimer: 60,
-        fqdn: isNFA ? 'nf-a.cluster-a.local' : 'nf-b.cluster-b.local',
-        ipv4Addresses: [isNFA ? '10.244.0.10' : '10.244.1.10'],
-        priority: 0, capacity: 100, load: 25,
-        nfServices: [{ serviceInstanceId: 'service-001', serviceName: isNFA ? 'namf-comm' : 'nsmf-pdusession', versions: [{ apiVersionInUri: 'v1', apiFullVersion: '1.0.0' }], scheme: 'https', nfServiceStatus: 'REGISTERED', fqdn: isNFA ? 'nf-a.cluster-a.local' : 'nf-b.cluster-b.local', ipEndPoints: [{ ipv4Address: isNFA ? '10.244.0.10' : '10.244.1.10', port: 443 }] }],
-        plmnList: [{ mcc: '262', mnc: '01' }], allowedPlmns: [{ mcc: '262', mnc: '02' }],
-        allowedNfTypes: ['AMF', 'SMF', 'UPF', 'AUSF'], locality: isNFA ? 'cluster-a' : 'cluster-b'
-    }],
-    searchId: `search-${Date.now()}`, numNfInstComplete: 1, validityPeriod: 3600, nrfSupportedFeatures: '0'
-});
-
 /** Business Logic Handler */
 function handleServiceRequest(service, action, params) {
-    console.log(`🔧 NF: ${service}/${action}`);
+    console.log(`[NF] ${service}/${action}`);
     switch (service) {
-        case 'nf-info':
-            return { nfType: isNFA ? 'NF-A' : 'NF-B', did: MY_DID, capabilities: ['authentication', 'data-query', 'subscription'], timestamp: new Date().toISOString() };
-        case 'data-query':
-            return { query: params?.query || 'default', results: [{ id: 1, name: 'Sample Data 1', value: 100 }, { id: 2, name: 'Sample Data 2', value: 200 }], totalCount: 2, executedBy: MY_DID, timestamp: new Date().toISOString() };
-        case 'subscription':
-            if (action === 'subscribe') return { subscriptionId: `sub-${Date.now()}`, topic: params?.topic || 'default', status: 'active', timestamp: new Date().toISOString() };
-            if (action === 'unsubscribe') return { subscriptionId: params?.subscriptionId, status: 'cancelled', timestamp: new Date().toISOString() };
-            break;
-        case 'echo':
-            return { echo: params, receivedAt: new Date().toISOString(), processedBy: MY_DID };
-        case 'nnrf-disc':
-        case 'nf-discovery':
-            return getNRFResponse();
         case 'nudm-sdm':
         case 'subscriber-data':
-            // 5G UDM Subscriber Data Query (3GPP TS 29.503)
             const supi = params?.supi || 'imsi-262011234567890';
             const dataType = params?.dataType || action || 'am-data';
             return getSubscriberData(supi, dataType);
         default:
             throw new Error(`Unknown service: ${service}`);
     }
-    throw new Error(`Unknown action: ${action} for service: ${service}`);
 }
+/**
+ * Baseline B: Send direct HTTP request to remote NF (no DIDComm, mTLS only)
+ * Used for performance comparison - bypasses Veramo sidecar entirely
+ */
+async function sendBaselineRequest(service, action, params) {
+    return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+        const payload = JSON.stringify({ service, action, params, sender: NF_NAME, timestamp: startTime });
+        const req = http_1.default.request({
+            hostname: BASELINE_TARGET_HOST,
+            port: parseInt(BASELINE_TARGET_PORT),
+            path: '/baseline/process',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(payload),
+                'X-Baseline-Mode': 'true',
+                'X-Request-Start': startTime.toString()
+            }
+        }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                const endTime = Date.now();
+                const latency = endTime - startTime;
+                if (res.statusCode === 200) {
+                    try {
+                        const result = JSON.parse(data);
+                        resolve({
+                            ...result,
+                            _baseline: {
+                                mode: 'B',
+                                latencyMs: latency,
+                                payloadSize: Buffer.byteLength(payload),
+                                responseSize: Buffer.byteLength(data)
+                            }
+                        });
+                    } catch (e) {
+                        resolve({ raw: data, _baseline: { mode: 'B', latencyMs: latency } });
+                    }
+                } else {
+                    reject(new Error(`Baseline request failed: ${res.statusCode} - ${data}`));
+                }
+            });
+        });
+        req.on('error', (err) => reject(new Error(`Baseline connection error: ${err.message}`)));
+        req.write(payload);
+        req.end();
+    });
+}
+
 /** Send service request to Veramo sidecar */
 async function sendServiceRequestToVeramo(targetDid, service, action, params) {
     return new Promise((resolve, reject) => {
@@ -202,7 +203,7 @@ function createHTTPServer() {
             req.on('end', () => {
                 try {
                     const data = JSON.parse(body);
-                    console.log(`📥 Response: ${data.status}`);
+                    console.log(`[RESPONSE] ${data.status}`);
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ received: true }));
                 } catch (error) {
@@ -212,6 +213,63 @@ function createHTTPServer() {
             });
             return;
         }
+        // ========================================================================
+        // BASELINE B: Direct mTLS-only endpoints (no DIDComm, no VPs)
+        // ========================================================================
+
+        // Baseline request - initiates direct NF-to-NF call (bypasses Veramo)
+        if (req.url === '/baseline/request' && req.method === 'POST') {
+            let body = '';
+            req.on('data', (chunk) => body += chunk);
+            req.on('end', async () => {
+                try {
+                    const { service, action, params } = JSON.parse(body);
+                    console.log(`[BASELINE-B] Initiating direct request: ${service}/${action}`);
+                    const result = await sendBaselineRequest(service, action, params);
+                    console.log(`[BASELINE-B] Response received in ${result._baseline?.latencyMs}ms`);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(result));
+                } catch (error) {
+                    console.error(`[BASELINE-B] Error: ${error.message}`);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: error.message, mode: 'baseline-B' }));
+                }
+            });
+            return;
+        }
+
+        // Baseline process - handles incoming direct requests from other NFs
+        if (req.url === '/baseline/process' && req.method === 'POST') {
+            let body = '';
+            req.on('data', (chunk) => body += chunk);
+            req.on('end', () => {
+                try {
+                    const { service, action, params, sender, timestamp } = JSON.parse(body);
+                    console.log(`[BASELINE-B] Processing request from ${sender}: ${service}/${action}`);
+                    const result = handleServiceRequest(service, action, params);
+                    const processTime = Date.now() - timestamp;
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        ...result,
+                        _baseline: {
+                            mode: 'B',
+                            processedBy: NF_NAME,
+                            processTimeMs: processTime
+                        }
+                    }));
+                } catch (error) {
+                    console.error(`[BASELINE-B] Process error: ${error.message}`);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: error.message, mode: 'baseline-B' }));
+                }
+            });
+            return;
+        }
+
+        // ========================================================================
+        // END BASELINE B
+        // ========================================================================
+
         // Request endpoint - external trigger to initiate service flow
         if (req.url === '/request' && req.method === 'POST') {
             let body = '';
@@ -227,12 +285,6 @@ function createHTTPServer() {
                     res.end(JSON.stringify({ error: error.message }));
                 }
             });
-            return;
-        }
-        // 5G NRF Discovery REST Endpoint (3GPP TS 29.510)
-        if (req.url?.startsWith('/nnrf-disc/v1/nf-instances') && req.method === 'GET') {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(getNRFResponse()));
             return;
         }
         // 5G UDM Subscriber Data Management REST Endpoints (3GPP TS 29.503 - Nudm_SDM)
@@ -277,7 +329,7 @@ function createHTTPServer() {
 async function main() {
     const server = createHTTPServer();
     server.listen(NF_PORT, () => {
-        console.log(`🚀 NF Service running on :${NF_PORT} [${NF_NAME}]`);
+        console.log(`[START] NF Service running on :${NF_PORT} [${NF_NAME}]`);
     });
 }
 main().catch((error) => {

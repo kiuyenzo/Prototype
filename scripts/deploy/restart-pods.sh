@@ -1,11 +1,11 @@
 #!/bin/bash
 # Restart pods and sync DBs to local data folder
 
-echo "🔄 Restarting pods..."
+echo "Restarting pods..."
 kubectl --context kind-cluster-a rollout restart deployment/nf-a -n nf-a-namespace
 kubectl --context kind-cluster-b rollout restart deployment/nf-b -n nf-b-namespace
 
-echo "⏳ Waiting for pods to be ready..."
+echo "Waiting for pods to be ready..."
 sleep 10
 
 NF_A_POD=$(kubectl --context kind-cluster-a get pods -n nf-a-namespace -l app=nf-a --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1].metadata.name}')
@@ -14,12 +14,11 @@ NF_B_POD=$(kubectl --context kind-cluster-b get pods -n nf-b-namespace -l app=nf
 kubectl --context kind-cluster-a wait --for=condition=ready pod/$NF_A_POD -n nf-a-namespace --timeout=60s
 kubectl --context kind-cluster-b wait --for=condition=ready pod/$NF_B_POD -n nf-b-namespace --timeout=60s
 
-echo "📦 Syncing DBs to local data folder..."
-# Navigate to project root (from scripts/deploy/)
+echo "Syncing DBs to local data folder..."
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 rm -f "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite"
 kubectl --context kind-cluster-a exec -n nf-a-namespace $NF_A_POD -c veramo-sidecar -- cat /app/data/db-nf-a/database-nf-a.sqlite > "$PROJECT_DIR/data/db-nf-a/database-nf-a.sqlite" 2>/dev/null
 kubectl --context kind-cluster-b exec -n nf-b-namespace $NF_B_POD -c veramo-sidecar -- cat /app/data/db-nf-b/database-nf-b.sqlite > "$PROJECT_DIR/data/db-nf-b/database-nf-b.sqlite" 2>/dev/null
 
-echo "✅ Done - Pods restarted & DBs synced to data/db-nf-*/database-*.sqlite"
+echo "Done - Pods restarted & DBs synced"

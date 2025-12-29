@@ -1,0 +1,37 @@
+# =============================================================================
+# DIDComm Signed: mTLS internal + DIDComm JWS (signed only)
+# =============================================================================
+# (nf, agent, proxy) ←mTLS+DIDComm(signed)→ Gateway ←mTLS+DIDComm(signed)→ Gateway
+#
+# - Cluster-internal: mTLS (STRICT)
+# - Between Gateways: mTLS
+# - DIDComm: signed/JWS (not encrypted, but integrity+authenticity)
+#
+# Apply:
+#   kubectl apply -f deploy/mtls-config/mtls-signed.yaml --context kind-cluster-a
+#   kubectl apply -f deploy/mtls-config/mtls-signed.yaml --context kind-cluster-b
+#
+# DIDCOMM_PACKING_MODE must be set to "signed"!
+# =============================================================================
+
+---
+# Enforce mTLS inside Cluster-A
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-a-namespace
+spec:
+  mtls:
+    mode: STRICT  # Signed: mTLS internal
+
+---
+# Enforce mTLS inside Cluster-B
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-b-namespace
+spec:
+  mtls:
+    mode: STRICT  # Signed: mTLS internal

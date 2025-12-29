@@ -1,0 +1,63 @@
+# =============================================================================
+# DIDComm Encrypted: TCP internal + DIDComm E2E authcrypt
+# =============================================================================
+# (nf, agent, proxy) ←TCP+DIDComm(enc)→ Gateway ←mTLS+DIDComm(enc)→ Gateway
+#
+# - Cluster-internal: TCP (no mTLS) - DestinationRule DISABLE
+# - Between Gateways: mTLS
+# - DIDComm: authcrypt (E2E encrypted)
+#
+# Apply:
+#   kubectl apply -f deploy/mtls-config/mtls-encrypted.yaml --context kind-cluster-a
+#   kubectl apply -f deploy/mtls-config/mtls-encrypted.yaml --context kind-cluster-b
+#
+# DIDCOMM_PACKING_MODE must be set to "encrypted" (default)
+# =============================================================================
+
+---
+# Cluster-A: PERMISSIVE allows both plain TCP and mTLS
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-a-namespace
+spec:
+  mtls:
+    mode: PERMISSIVE  # Encrypted: Accepts TCP and mTLS
+
+---
+# Cluster-A: Disable mTLS for internal service communication (force TCP)
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: internal-tcp-mode
+  namespace: nf-a-namespace
+spec:
+  host: "*.nf-a-namespace.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE  # Encrypted: Force TCP (no mTLS) internally
+
+---
+# Cluster-B: PERMISSIVE allows both plain TCP and mTLS
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-b-namespace
+spec:
+  mtls:
+    mode: PERMISSIVE  # Encrypted: Accepts TCP and mTLS
+
+---
+# Cluster-B: Disable mTLS for internal service communication (force TCP)
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: internal-tcp-mode
+  namespace: nf-b-namespace
+spec:
+  host: "*.nf-b-namespace.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE  # Encrypted: Force TCP (no mTLS) internally

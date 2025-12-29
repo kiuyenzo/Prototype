@@ -1,9 +1,9 @@
 # Infrastructure for Cluster-A
 # Contains: Namespace, Stub-Service for cross-cluster, ServiceEntry
 #
-# VARIANTEN (mTLS-Config separat in deploy/mtls-config/):
-# V1:  kubectl apply -f deploy/mtls-config/mtls-v1.yaml   + DIDCOMM_PACKING_MODE=encrypted
-# V4a: kubectl apply -f deploy/mtls-config/mtls-v4a.yaml + DIDCOMM_PACKING_MODE=none
+# Modes (mTLS config separate in deploy/mtls-config/):
+# Encrypted: kubectl apply -f deploy/mtls-config/mtls-encrypted.yaml + DIDCOMM_PACKING_MODE=encrypted
+# Signed:    kubectl apply -f deploy/mtls-config/mtls-signed.yaml    + DIDCOMM_PACKING_MODE=signed
 
 # =============================================================================
 # Namespace for NF-A

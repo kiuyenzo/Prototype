@@ -1,0 +1,4 @@
+type,size_bytes,description
+plain_json,82,Service request payload (unencrypted)
+didcomm_request,978,DIDComm encrypted request (JWE)
+didcomm_message,1374,DIDComm service message (JWE)

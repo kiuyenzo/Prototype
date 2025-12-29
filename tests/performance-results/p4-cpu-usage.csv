@@ -1,0 +1,4 @@
+timestamp,pod,container,cpu_millicores,memory_mib
+baseline,nf-a,all,,
+load,nf-a,veramo-sidecar,,
+load,nf-a,istio-proxy,,N/A

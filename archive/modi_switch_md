@@ -36,10 +36,10 @@ V4a: PeerAuthentication mit mtls: STRICT (Standard)
 Willst du das?
 
 
-Implementiert
-Neue Dateien:
-istio-mtls-v1.yaml - PERMISSIVE (TCP erlaubt)
-istio-mtls-v4a.yaml - STRICT (mTLS erzwungen)
+Implemented
+New files:
+mtls-encrypted.yaml - PERMISSIVE (TCP allowed)
+mtls-signed.yaml - STRICT (mTLS enforced)
 Aktualisiert:
 build-and-deploy.sh - Erkennt Modus und wendet richtige mTLS-Config an
 Modi

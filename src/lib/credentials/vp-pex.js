@@ -23,13 +23,13 @@ const pex = new PEX();
  * @returns Matching credentials
  */
 function selectCredentialsForPD(credentials, presentationDefinition) {
-    console.log('🔍 Selecting credentials for PD:', presentationDefinition.id);
+    console.log('[PEX] Selecting credentials for PD:', presentationDefinition.id);
 
     try {
         const result = pex.selectFrom(presentationDefinition, credentials);
 
         if (result.errors && result.errors.length > 0) {
-            console.log(`   ⚠️  PEX errors: ${result.errors.map(e => e.message).join(', ')}`);
+            console.log(`   [WARN] PEX errors: ${result.errors.map(e => e.message).join(', ')}`);
         }
 
         const matches = result.matches || [];
@@ -50,7 +50,7 @@ function selectCredentialsForPD(credentials, presentationDefinition) {
 
         // Fallback: if no matches but credentials exist, try direct matching
         if (selectedCredentials.length === 0 && credentials.length > 0) {
-            console.log('   ⚠️  PEX returned no matches, using fallback selection');
+            console.log('   [WARN] PEX returned no matches, using fallback selection');
             return credentials.filter(cred => {
                 const types = cred.type || [];
                 const subject = cred.credentialSubject || {};
@@ -62,7 +62,7 @@ function selectCredentialsForPD(credentials, presentationDefinition) {
 
         return selectedCredentials.length > 0 ? selectedCredentials : credentials.slice(0, 1);
     } catch (error) {
-        console.error('❌ PEX selectFrom failed:', error.message);
+        console.error('[ERROR] PEX selectFrom failed:', error.message);
         // Fallback: return first credential
         return credentials.slice(0, 1);
     }
@@ -79,7 +79,7 @@ function selectCredentialsForPD(credentials, presentationDefinition) {
  * @returns Verifiable Presentation
  */
 async function createVPFromPD(agent, holderDid, availableCredentials, presentationDefinition, verifierDid) {
-    console.log('📋 Creating VP from Presentation Definition (PEX)');
+    console.log('[VP] Creating VP from Presentation Definition (PEX)');
     console.log(`   Holder: ${holderDid}`);
     console.log(`   Verifier: ${verifierDid || '(not specified)'}`);
     console.log(`   PD: ${presentationDefinition.id}`);
@@ -135,18 +135,18 @@ async function createVPFromPD(agent, holderDid, availableCredentials, presentati
                 fs.writeFileSync(tmpFile, sql);
                 spawnSync('sqlite3', [dbPath, `.read ${tmpFile}`], { stdio: 'inherit' });
                 fs.unlinkSync(tmpFile);
-                console.log('   ✅ VP saved to database');
+                console.log('   [OK] VP saved to database');
             } else {
-                console.log('   ⚠️  No DB_PATH for VP save');
+                console.log('   [WARN] No DB_PATH for VP save');
             }
         } catch (saveErr) {
-            console.log(`   ⚠️  VP not saved: ${saveErr.message}`);
+            console.log(`   [WARN] VP not saved: ${saveErr.message}`);
         }
 
-        console.log('✅ VP created (PEX)');
+        console.log('[OK] VP created (PEX)');
         return vp;
     } catch (error) {
-        console.error('❌ Error creating VP:', error.message);
+        console.error('[ERROR] Error creating VP:', error.message);
         throw error;
     }
 }
@@ -160,7 +160,7 @@ async function createVPFromPD(agent, holderDid, availableCredentials, presentati
  * @returns Verification result
  */
 async function verifyVPAgainstPD(agent, presentation, presentationDefinition) {
-    console.log('🔍 Verifying VP against Presentation Definition (PEX)');
+    console.log('[VERIFY] Verifying VP against Presentation Definition (PEX)');
 
     try {
         // Step 1: Cryptographic verification with Veramo
@@ -170,13 +170,13 @@ async function verifyVPAgainstPD(agent, presentation, presentationDefinition) {
         });
 
         if (!cryptoResult.verified) {
-            console.log('❌ Cryptographic verification failed');
+            console.log('[ERROR] Cryptographic verification failed');
             return {
                 verified: false,
                 error: cryptoResult.error || { message: 'Signature verification failed' }
             };
         }
-        console.log('   ✅ Cryptographic verification passed');
+        console.log('   [OK] Cryptographic verification passed');
 
         // Step 2: PEX evaluation against PD
         console.log('   Step 2: PEX evaluation against PD...');
@@ -187,7 +187,7 @@ async function verifyVPAgainstPD(agent, presentation, presentationDefinition) {
 
         if (evalResult.value === 'error' || (evalResult.errors && evalResult.errors.length > 0)) {
             // Log errors but don't fail - do fallback check
-            console.log('   ⚠️  PEX evaluation warnings:', evalResult.errors?.map(e => e.message).join(', '));
+            console.log('   [WARN] PEX evaluation warnings:', evalResult.errors?.map(e => e.message).join(', '));
         }
 
         // Fallback: Manual check if credentials match basic requirements
@@ -199,18 +199,18 @@ async function verifyVPAgainstPD(agent, presentation, presentationDefinition) {
         });
 
         if (hasValidCredentials) {
-            console.log('✅ VP satisfies Presentation Definition');
+            console.log('[OK] VP satisfies Presentation Definition');
             return { verified: true };
         }
 
-        console.log('❌ VP does not satisfy Presentation Definition');
+        console.log('[ERROR] VP does not satisfy Presentation Definition');
         return {
             verified: false,
             error: { message: 'VP does not satisfy Presentation Definition' }
         };
 
     } catch (error) {
-        console.error('❌ Error verifying VP:', error.message);
+        console.error('[ERROR] Error verifying VP:', error.message);
         return {
             verified: false,
             error: error

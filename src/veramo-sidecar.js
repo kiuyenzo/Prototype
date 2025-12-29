@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 "use strict";
 /**
  * Veramo Sidecar - DIDComm Handler (Port 3001)
@@ -32,19 +32,19 @@ const pex_definitions_js_1 = require("./lib/credentials/vp_definitions.js"); // 
 const packMode = () => ({ encrypted: 'authcrypt', anon: 'anoncrypt', signed: 'jws', none: 'none' }[process.env.DIDCOMM_PACKING_MODE] || 'authcrypt');
 const packMsg = async (a, m, to, from) => {
     try {
-        console.log(`📦 Packing: mode=${packMode()}, from=${from}, to=${to}`);
+        console.log(`[PACK] mode=${packMode()}, from=${from}, to=${to}`);
         const packed = await a.packDIDCommMessage({ packing: packMode(), message: { ...m, from, to: [to] } });
-        console.log(`✅ Packed successfully, length=${packed.message.length}`);
+        console.log(`[PACK] Success, length=${packed.message.length}`);
         return packed.message;
     } catch (e) {
-        console.log(`❌ Pack failed: ${e.message}`);
-        return JSON.stringify(m);
+        console.error(`[PACK] Failed: ${e.message}`);
+        throw new Error(`DIDComm packing failed: ${e.message}`);
     }
 };
 const unpackMsg = async (a, p) => (await a.unpackDIDCommMessage({ message: p })).message;
 
 // Configuration
-const DB_PATH = process.env.DB_PATH || './database.sqlite'; //welche DB?: Die DB wird per Environment Variable gesetzt in cluster-a/deployment.yaml:
+const DB_PATH = process.env.DB_PATH || './database.sqlite';
 const DB_ENCRYPTION_KEY = process.env.DB_ENCRYPTION_KEY || '';
 const VERAMO_PORT = process.env.VERAMO_PORT || 3001, NF_PORT = process.env.NF_PORT || 3000;
 const MY_DID = process.env.MY_DID || '', PACKING_MODE = process.env.DIDCOMM_PACKING_MODE || 'encrypted';
@@ -58,7 +58,7 @@ const pendingServiceRequests = new Map();
  * Initialize Veramo agent
  */
 async function initializeAgent() {
-    console.log(`🔧 Initializing Veramo Sidecar [DID: ${MY_DID}, Mode: ${PACKING_MODE}]`);
+    console.log(`[INIT] Veramo Sidecar [DID: ${MY_DID}, Mode: ${PACKING_MODE}]`);
     const dbConnection = new typeorm_1.DataSource({
         type: 'sqlite',
         database: DB_PATH,
@@ -92,7 +92,7 @@ async function initializeAgent() {
             new data_store_1.DataStoreORM(dbConnection),
             new did_comm_1.DIDComm(),
             new message_handler_1.MessageHandler({ messageHandlers: [] }),
-            // SelectiveDisclosure ist deprecated in v6 - manuelle SDR-Implementierung wird verwendet
+            // SelectiveDisclosure is deprecated in v6
         ],
     });
     wrapper = new didcomm_vp_wrapper_js_1.DIDCommVPWrapper(agent);
@@ -113,7 +113,7 @@ async function loadCredentials() {
  * Call NF container for business logic (localhost:3000)
  */
 async function callNFService(service, action, params) {
-    console.log(`📤 NF call: ${service}/${action}`);
+    console.log(`[NF] Call: ${service}/${action}`);
     return new Promise((resolve, reject) => {
         const payload = JSON.stringify({ service, action, params });
         const req = http_1.default.request({
@@ -165,7 +165,7 @@ async function sendDIDCommMessage(message, targetDid) {
     const targetUrl = USE_K8S
         ? `http://${targetHost}:3001/didcomm/send`
         : `http://envoy-proxy-nf-${isNFA ? 'a' : 'b'}:8080/didcomm/send`;
-    console.log(`📤 DIDComm: ${message.type.split('/').pop()} → ${targetDid.split(':').pop()}`);
+    console.log(`[DIDCOMM] Send: ${message.type.split('/').pop()} -> ${targetDid.split(':').pop()}`);
     const packedMessage = await packMsg(agent, message, targetDid, MY_DID);
     const payload = JSON.stringify({
         packed: true,
@@ -196,22 +196,22 @@ async function sendDIDCommMessage(message, targetDid) {
 }
 /** Handle incoming DIDComm message from Envoy */
 async function handleIncomingMessage(messageOrEncrypted) {
-    console.log(`🔍 Incoming: packed=${messageOrEncrypted.packed}, mode=${messageOrEncrypted.mode}, msgLen=${messageOrEncrypted.message?.length || 'N/A'}`);
+    console.log(`[DIDCOMM] Incoming: packed=${messageOrEncrypted.packed}, mode=${messageOrEncrypted.mode}, msgLen=${messageOrEncrypted.message?.length || 'N/A'}`);
     let message;
     try {
         if ((messageOrEncrypted.packed || messageOrEncrypted.encrypted) && messageOrEncrypted.message) {
-            console.log(`🔐 Unpacking message...`);
+            console.log(`[UNPACK] Unpacking message...`);
             message = await unpackMsg(agent, messageOrEncrypted.message);
-            console.log(`✅ Unpacked: type=${message.type}`);
+            console.log(`[UNPACK] Success: type=${message.type}`);
         } else {
             message = messageOrEncrypted;
         }
     } catch (unpackError) {
-        console.log(`❌ Unpack failed: ${unpackError.message}`);
-        console.log(`📦 Raw: ${messageOrEncrypted.message?.substring(0, 300)}`);
+        console.log(`[UNPACK] Failed: ${unpackError.message}`);
+        console.log(`[UNPACK] Raw: ${messageOrEncrypted.message?.substring(0, 300)}`);
         throw unpackError;
     }
-    console.log(`📨 ${message.type.split('/').pop()} from ${message.from?.split(':').pop()}`);
+    console.log(`[MSG] ${message.type.split('/').pop()} from ${message.from?.split(':').pop()}`);
     try { await agent.dataStoreSaveMessage({ message: { id: message.id || `msg-${Date.now()}`, type: message.type, from: message.from, to: message.to?.[0] || MY_DID, createdAt: new Date().toISOString(), data: message.body } }); } catch (e) { /* ignore */ }
     const credentials = await loadCredentials();
     const MT = didcomm_messages_js_1.DIDCOMM_MESSAGE_TYPES;
@@ -261,7 +261,7 @@ async function handleIncomingMessage(messageOrEncrypted) {
             await sendResponseToNF({ type: 'service_response', from: message.from, status: message.body.status, data: message.body.data, error: message.body.error });
             return null;
         default:
-            console.log(`⚠️ Unknown: ${message.type}`);
+            console.log(`[WARN] Unknown message type: ${message.type}`);
             return null;
     }
 }
@@ -319,7 +319,7 @@ async function main() {
     await initializeAgent();
     const server = createHTTPServer();
     server.listen(VERAMO_PORT, () => {
-        console.log(`🚀 Veramo Sidecar running on :${VERAMO_PORT} [DID: ${MY_DID.split(':').pop()}]`);
+        console.log(`[START] Veramo Sidecar running on :${VERAMO_PORT} [DID: ${MY_DID.split(':').pop()}]`);
     });
 }
 main().catch((error) => {

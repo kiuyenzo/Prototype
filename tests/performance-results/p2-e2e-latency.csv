@@ -1,0 +1,16 @@
+iteration,type,latency_ms
+1,baseline,166
+1,vp_first,589
+1,vp_subsequent,423
+2,baseline,166
+2,vp_first,436
+2,vp_subsequent,421
+3,baseline,174
+3,vp_first,470
+3,vp_subsequent,441
+4,baseline,121
+4,vp_first,899
+4,vp_subsequent,871
+5,baseline,194
+5,vp_first,479
+5,vp_subsequent,547

@@ -1,0 +1,6 @@
+iteration,handshake_ms,total_request_ms,auth_overhead_percent
+1,2130,2788,76.4
+2,0,507,0.0
+3,0,639,0.0
+4,0,806,0.0
+5,304,966,31.5

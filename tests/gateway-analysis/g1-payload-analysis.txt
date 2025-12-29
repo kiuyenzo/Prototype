@@ -1,0 +1,261 @@
+G1: Payload Visibility Analysis - Fri Dec 26 15:52:26 CET 2025
+=============================================
+
+--- Envoy Access Logs (NF-A) ---
+[2025-12-26T14:46:54.544Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1086 0 65 65 "10.244.0.1" "-" "f32d81e7-8ced-9e0b-89bc-ce25773130fd" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:40677 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:46:54.387Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1022 0 224 223 "-" "-" "0503a384-5b73-9c3c-b4e4-6453796b7bd3" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:50620 - default
+[2025-12-26T14:46:54.286Z] "POST /nf/service-request HTTP/1.1" 200 - via_upstream - "-" 163 54 326 326 "10.244.0.1" "curl/7.88.1" "fad5db93-c733-9747-a866-2e4353b8e5ce" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:43619 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:46:51.871Z] "- - -" 0 - - - "-" 3455 15920 7755 - "-" "-" "-" "-" "185.199.110.153:443" PassthroughCluster 10.244.0.8:43134 185.199.110.153:443 10.244.0.8:43118 - -
+[2025-12-26T14:47:06.028Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1078 0 74 74 "10.244.0.1" "-" "bf7ddc0c-13f0-9cd8-828b-4915de0de28f" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:44859 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:47:05.736Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 962 0 369 367 "-" "-" "35bdd2e9-ba4c-9531-bfd5-2717f43f332f" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:44758 - default
+[2025-12-26T14:47:05.402Z] "POST /nf/service-request HTTP/1.1" 200 - via_upstream - "-" 2 54 703 701 "10.244.0.1" "curl/7.88.1" "fe39053d-dd73-9a65-8c0a-0d1804014a88" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:47391 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:47:06.264Z] "GET /credentials HTTP/1.1" 404 - via_upstream - "-" 0 9 86 84 "10.244.0.1" "curl/7.88.1" "9886ecc3-1257-9771-92ad-ddcafba62e48" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:47391 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:47:05.521Z] "- - -" 0 - - - "-" 1583 5620 5587 - "-" "-" "-" "-" "185.199.111.153:443" PassthroughCluster 10.244.0.8:39564 185.199.111.153:443 10.244.0.8:39548 - -
+[2025-12-26T14:48:35.186Z] "GET /health HTTP/1.1" 200 - via_upstream - "-" 0 101 25 23 "10.244.0.1" "curl/7.88.1" "dfc9c3e2-d4c2-966a-b3f8-8c5e2f8718b7" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:58419 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:35.670Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 838 62 10 9 "-" "-" "c086287d-9008-93b4-907e-18b2628ab179" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34886 - default
+[2025-12-26T14:48:35.473Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 151 88 208 207 "10.244.0.1" "curl/7.88.1" "7b7ee55e-7bc3-9327-87fb-a3d43ae54b91" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:58419 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:35.824Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 834 62 3 2 "-" "-" "a19dae29-37cc-9369-b6b6-fa1e2d5175b5" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34886 - default
+[2025-12-26T14:48:35.785Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 147 88 42 42 "10.244.0.1" "curl/7.88.1" "74ac44e8-38f6-9cb9-ae94-56bb75c7bfe6" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:58419 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:35.917Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 826 62 3 2 "-" "-" "bcae8d3e-9950-945e-8cc0-46be85ab3734" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34886 - default
+[2025-12-26T14:48:35.892Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 139 88 29 29 "10.244.0.1" "curl/7.88.1" "964b7159-2fa2-9f61-ad50-e5f60e2f3adb" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:58419 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:36.020Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 819 62 6 6 "-" "-" "97e6e9c2-fdf7-904f-a9f7-5a5937719d87" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34886 - default
+[2025-12-26T14:48:35.992Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 132 88 37 37 "10.244.0.1" "curl/7.88.1" "006c476e-509d-9383-82df-5669110cc18a" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:58419 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:37.403Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1072 0 79 78 "10.244.0.1" "-" "77800448-3451-9f8b-a69b-1dfe4a0b556b" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:57239 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:37.245Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1005 0 239 239 "-" "-" "c307dbdd-20e3-951c-ac39-6922d8408311" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34908 - default
+[2025-12-26T14:48:37.085Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1357 0 400 399 "10.244.0.1" "-" "d3f07438-7833-9311-97d4-961623a01ded" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:54937 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:36.878Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 4686 0 608 608 "-" "-" "1079d04c-f52d-9195-8409-d0d067e6c2d8" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34898 - default
+[2025-12-26T14:48:36.604Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 5421 0 883 882 "10.244.0.1" "-" "c94a3b84-9b7d-9551-b5a0-29c25de5209b" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:42993 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:36.205Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1616 0 1283 1283 "-" "-" "f133c2f6-3519-945a-9f5b-ea15ff19f13d" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34886 - default
+[2025-12-26T14:48:36.104Z] "POST /nf/service-request HTTP/1.1" 202 - via_upstream - "-" 116 56 1384 1384 "10.244.0.1" "curl/7.88.1" "780c7382-eb3b-9133-a5fc-a30da489a522" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:58419 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:37.924Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1086 0 70 70 "10.244.0.1" "-" "d3caf80e-a232-9aaf-a173-86481dbf0629" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:42993 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:37.750Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1022 0 246 245 "-" "-" "1ab0c847-2a58-9e97-80bc-35e1d49ad4a5" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:34886 - default
+[2025-12-26T14:48:37.683Z] "POST /nf/service-request HTTP/1.1" 200 - via_upstream - "-" 163 54 313 313 "10.244.0.1" "curl/7.88.1" "3e50769d-5956-9a00-9375-c82cc2ee791c" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:58419 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:48:35.526Z] "- - -" 0 - - - "-" 5561 27604 7529 - "-" "-" "-" "-" "185.199.109.153:443" PassthroughCluster 10.244.0.8:53124 185.199.109.153:443 10.244.0.8:53108 - -
+[2025-12-26T14:48:53.761Z] "GET /credentials HTTP/1.1" 404 - via_upstream - "-" 0 9 7 4 "10.244.0.1" "curl/7.88.1" "29122194-386f-98f8-958a-2c7c26f9cb54" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:33759 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:15.217Z] "GET /health HTTP/1.1" 200 - via_upstream - "-" 0 101 6 4 "10.244.0.1" "curl/7.88.1" "8bfc6a9b-7401-9df7-a9f0-95e6e4643b1a" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:46437 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:15.633Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 838 62 9 8 "-" "-" "62a44b63-e4ed-93a1-83ff-6bb107153840" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:35746 172.23.0.2:3001 10.244.0.8:51062 - default
+[2025-12-26T14:49:15.466Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 151 88 177 176 "10.244.0.1" "curl/7.88.1" "9260bbc3-785f-958a-b423-2e1da69a4a4d" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:46437 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:15.811Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 834 62 3 3 "-" "-" "293ee6ca-46ff-94dc-b03c-7c0d5656011a" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:35746 172.23.0.2:3001 10.244.0.8:51062 - default
+[2025-12-26T14:49:15.775Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 147 88 40 40 "10.244.0.1" "curl/7.88.1" "621f2316-4269-9cdc-9612-da578ffa6584" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:46437 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:15.936Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 826 62 2 2 "-" "-" "6dc1bc81-5912-923e-92f2-527746d6bd87" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:35746 172.23.0.2:3001 10.244.0.8:51062 - default
+[2025-12-26T14:49:15.905Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 139 88 34 33 "10.244.0.1" "curl/7.88.1" "791352c0-2c68-941b-88eb-c468e93d1efa" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:46437 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:16.083Z] "POST /didcomm/send HTTP/1.1" 500 - via_upstream - "-" 819 62 4 4 "-" "-" "b4b63605-e086-97fe-9d04-d25b77b0d886" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:35746 172.23.0.2:3001 10.244.0.8:51062 - default
+[2025-12-26T14:49:16.040Z] "POST /nf/service-request HTTP/1.1" 500 - via_upstream - "-" 132 88 48 47 "10.244.0.1" "curl/7.88.1" "5c004ed3-c0f4-907c-9352-202a7572de6f" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:46437 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:16.568Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1072 0 92 92 "10.244.0.1" "-" "14771290-26ef-9e6a-bc9b-27e6cf97907e" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:52359 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:16.219Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1005 0 448 448 "-" "-" "54521194-613b-951d-9798-f130b99cbdad" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:35746 172.23.0.2:3001 10.244.0.8:51062 - default
+[2025-12-26T14:49:16.154Z] "POST /nf/service-request HTTP/1.1" 200 - via_upstream - "-" 116 54 514 514 "10.244.0.1" "curl/7.88.1" "4ef88e67-8a26-9a29-96f2-b0f9a2632128" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:46437 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:17.080Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1086 0 78 77 "10.244.0.1" "-" "7f6fe058-2d27-955f-a3dd-066aa1b36073" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:52359 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:16.941Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1022 0 219 218 "-" "-" "2a6823b4-9226-95f9-bc09-002dd1ee0ded" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:35746 172.23.0.2:3001 10.244.0.8:51062 - default
+[2025-12-26T14:49:16.850Z] "POST /nf/service-request HTTP/1.1" 200 - via_upstream - "-" 163 54 310 309 "10.244.0.1" "curl/7.88.1" "2960ea8f-7c83-9215-b70d-b9be7c6767af" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:46437 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:49:15.498Z] "- - -" 0 - - - "-" 3455 15964 6821 - "-" "-" "-" "-" "185.199.108.153:443" PassthroughCluster 10.244.0.8:33224 185.199.108.153:443 10.244.0.8:33214 - -
+[2025-12-26T14:49:33.131Z] "GET /credentials HTTP/1.1" 404 - via_upstream - "-" 0 9 6 4 "10.244.0.1" "curl/7.88.1" "ed9a94fe-6060-9bc2-a719-7d56e24aa0cc" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:32961 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:52:27.427Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1086 0 170 168 "10.244.0.1" "-" "c8215fe7-b058-92f1-bde1-ba2c888007d9" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:34891 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+[2025-12-26T14:52:26.776Z] "POST /didcomm/send HTTP/1.1" 200 - via_upstream - "-" 1088 0 844 842 "-" "-" "b5a244d9-306c-960e-b1c8-b730b4a72114" "veramo-nf-b.nf-b-namespace.svc.cluster.local" "172.23.0.3:31696" outbound|3001||veramo-nf-b.nf-b-namespace.svc.cluster.local 10.244.0.8:53026 172.23.0.2:3001 10.244.0.8:59472 - default
+[2025-12-26T14:52:26.456Z] "POST /nf/service-request HTTP/1.1" 200 - via_upstream - "-" 169 54 1166 1160 "10.244.0.1" "curl/7.88.1" "3b9f8225-36e6-913d-bbe8-f7bd84dbaf49" "veramo-nf-a.nf-a-namespace.svc.cluster.local" "10.244.0.8:3001" inbound|3001|| 127.0.0.6:59507 10.244.0.8:3001 10.244.0.1:0 outbound_.3001_._.veramo-nf-a.nf-a-namespace.svc.cluster.local default
+
+--- Application Logs (NF-A Veramo) ---
+📝 Session: session-bqohk6 [did-nf-a ↔ invalid]
+📤 DIDComm: request-presentation → invalid
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:fake:method:invalid
+❌ Pack failed: not_found: could not resolve DID document for 'did:fake:method:invalid': unsupportedDidMethod undefined
+HTTP error: HTTP 500: {"error":"invalid_argument: unable to determine message type"}
+📝 Session: session-1taiqt [did-nf-a ↔ not-a-did-at-all]
+📤 DIDComm: request-presentation → not-a-did-at-all
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=not-a-did-at-all
+❌ Pack failed: not_found: could not resolve DID document for 'not-a-did-at-all': invalidDid undefined
+HTTP error: HTTP 500: {"error":"invalid_argument: unable to determine message type"}
+📝 Session: session-azr4qr [did-nf-a ↔ did-nf-b]
+📤 DIDComm: request-presentation → did-nf-b
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+✅ Packed successfully, length=1541
+🔍 Incoming: packed=true, mode=encrypted, msgLen=5346
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/present-proof/3.0/presentation-with-definition
+📨 presentation-with-definition from did-nf-b
+🔍 Phase 2: Handling VP_WITH_PD from did-nf-b
+🔍 Verifying VP against Presentation Definition (PEX)
+   Step 1: Cryptographic verification...
+   ✅ Cryptographic verification passed
+   Step 2: PEX evaluation against PD...
+   ⚠️  PEX evaluation warnings: Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], The input candidate is not eligible for submission: $.input_descriptors[0]: $.verifiableCredential[0]
+✅ VP satisfies Presentation Definition
+📋 Creating VP from Presentation Definition (PEX)
+   Holder: did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+   Verifier: did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+   PD: pd-nf-auth-request-b
+   Available credentials: 1
+🔍 Selecting credentials for PD: pd-nf-auth-request-b
+   ⚠️  PEX errors: Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], The input candidate is not eligible for submission: $.input_descriptors[0]: $.verifiableCredential[0]
+   Found 0 matching credential(s)
+   ⚠️  PEX returned no matches, using fallback selection
+   Selected 1 credential(s) for VP
+   ✅ VP saved to database
+✅ VP created (PEX)
+📤 DIDComm: presentation → did-nf-b
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+✅ Packed successfully, length=4611
+🔍 Incoming: packed=true, mode=encrypted, msgLen=1282
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/present-proof/3.0/ack
+📨 ack from did-nf-b
+📬 Phase 3: Auth Confirmation [OK]
+📤 DIDComm: request → did-nf-b
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+✅ Packed successfully, length=930
+🔍 Incoming: packed=true, mode=encrypted, msgLen=997
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/response
+📨 response from did-nf-b
+📤 DIDComm: request → did-nf-b
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+✅ Packed successfully, length=947
+🔍 Incoming: packed=true, mode=encrypted, msgLen=1011
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/response
+📨 response from did-nf-b
+📝 Session: session-lp83v7 [did-nf-a ↔ fake-nf]
+📤 DIDComm: request-presentation → fake-nf
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:invalid.example.com:fake-nf
+❌ Pack failed: not_found: could not resolve DID document for 'did:web:invalid.example.com:fake-nf': notFound resolver_error: DID must resolve to a valid https URL containing a JSON document: FetchError: request to https://invalid.example.com/fake-nf/did.json failed, reason: getaddrinfo ENOTFOUND invalid.example.com
+HTTP error: HTTP 500: {"error":"invalid_argument: unable to determine message type"}
+📝 Session: session-poznrk [did-nf-a ↔ test]
+📤 DIDComm: request-presentation → test
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:nonexistent.domain:test
+❌ Pack failed: not_found: could not resolve DID document for 'did:web:nonexistent.domain:test': notFound resolver_error: DID must resolve to a valid https URL containing a JSON document: FetchError: request to https://nonexistent.domain/test/did.json failed, reason: getaddrinfo ENOTFOUND nonexistent.domain
+HTTP error: HTTP 500: {"error":"invalid_argument: unable to determine message type"}
+📝 Session: session-bqohk6 [did-nf-a ↔ invalid]
+📤 DIDComm: request-presentation → invalid
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:fake:method:invalid
+❌ Pack failed: not_found: could not resolve DID document for 'did:fake:method:invalid': unsupportedDidMethod undefined
+HTTP error: HTTP 500: {"error":"invalid_argument: unable to determine message type"}
+📝 Session: session-1taiqt [did-nf-a ↔ not-a-did-at-all]
+📤 DIDComm: request-presentation → not-a-did-at-all
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=not-a-did-at-all
+❌ Pack failed: not_found: could not resolve DID document for 'not-a-did-at-all': invalidDid undefined
+HTTP error: HTTP 500: {"error":"invalid_argument: unable to determine message type"}
+📤 DIDComm: request → did-nf-b
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+✅ Packed successfully, length=930
+🔍 Incoming: packed=true, mode=encrypted, msgLen=997
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/response
+📨 response from did-nf-b
+📤 DIDComm: request → did-nf-b
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+✅ Packed successfully, length=947
+🔍 Incoming: packed=true, mode=encrypted, msgLen=1011
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/response
+📨 response from did-nf-b
+📤 DIDComm: request → did-nf-b
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+✅ Packed successfully, length=1013
+🔍 Incoming: packed=true, mode=encrypted, msgLen=1011
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/response
+📨 response from did-nf-b
+
+--- Application Logs (NF-B Veramo) ---
+🔐 Unpacking message...
+❌ Unpack failed: invalid_argument: unable to determine message type
+📦 Raw: {"type":"https://didcomm.org/present-proof/3.0/request-presentation","id":"1766760515994-hjpyq2i7o","from":"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a","to":["not-a-did-at-all"],"created_time":1766760515994,"body":{"presentation_definition":{"id":"pd-nf-auth-request-a","input_descriptors":[{
+HTTP error: invalid_argument: unable to determine message type
+🔍 Incoming: packed=true, mode=encrypted, msgLen=1541
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/present-proof/3.0/request-presentation
+📨 request-presentation from did-nf-a
+📝 Session: session-azr4qr [did-nf-a ↔ did-nf-b]
+📨 Phase 2: VP Auth Request from did-nf-a
+📋 Creating VP from Presentation Definition (PEX)
+   Holder: did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b
+   Verifier: did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+   PD: pd-nf-auth-request-a
+   Available credentials: 1
+🔍 Selecting credentials for PD: pd-nf-auth-request-a
+   ⚠️  PEX errors: Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], The input candidate is not eligible for submission: $.input_descriptors[0]: $.verifiableCredential[0]
+   Found 0 matching credential(s)
+   ⚠️  PEX returned no matches, using fallback selection
+   Selected 1 credential(s) for VP
+   ✅ VP saved to database
+✅ VP created (PEX)
+📤 DIDComm: presentation-with-definition → did-nf-a
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+✅ Packed successfully, length=5346
+🔍 Incoming: packed=true, mode=encrypted, msgLen=4611
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/present-proof/3.0/presentation
+📨 presentation from did-nf-a
+✅ Phase 2 final: VP Response from did-nf-a
+🔍 Verifying VP against Presentation Definition (PEX)
+   Step 1: Cryptographic verification...
+   ✅ Cryptographic verification passed
+   Step 2: PEX evaluation against PD...
+   ⚠️  PEX evaluation warnings: Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], Input candidate does not contain property: $.input_descriptors[0]: $.verifiableCredential[0], The input candidate is not eligible for submission: $.input_descriptors[0]: $.verifiableCredential[0]
+✅ VP satisfies Presentation Definition
+🎉 Mutual authentication successful!
+📤 DIDComm: ack → did-nf-a
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+✅ Packed successfully, length=1282
+🔍 Incoming: packed=true, mode=encrypted, msgLen=930
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/request
+📨 request from did-nf-a
+📤 NF call: test/test
+📤 DIDComm: response → did-nf-a
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+✅ Packed successfully, length=997
+🔍 Incoming: packed=true, mode=encrypted, msgLen=947
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/request
+📨 request from did-nf-a
+📤 NF call: test-invalid-vc/verify
+📤 DIDComm: response → did-nf-a
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+✅ Packed successfully, length=1011
+🔍 Incoming: packed=true, mode=encrypted, msgLen=715
+🔐 Unpacking message...
+❌ Unpack failed: invalid_argument: unable to determine message type
+📦 Raw: {"type":"https://didcomm.org/present-proof/3.0/request-presentation","id":"1766760555472-reg3g0rld","from":"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a","to":["did:web:invalid.example.com:fake-nf"],"created_time":1766760555472,"body":{"presentation_definition":{"id":"pd-nf-auth-request-a","in
+HTTP error: invalid_argument: unable to determine message type
+🔍 Incoming: packed=true, mode=encrypted, msgLen=711
+🔐 Unpacking message...
+HTTP error: invalid_argument: unable to determine message type
+❌ Unpack failed: invalid_argument: unable to determine message type
+📦 Raw: {"type":"https://didcomm.org/present-proof/3.0/request-presentation","id":"1766760555776-ymib3rllg","from":"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a","to":["did:web:nonexistent.domain:test"],"created_time":1766760555776,"body":{"presentation_definition":{"id":"pd-nf-auth-request-a","input_
+🔍 Incoming: packed=true, mode=encrypted, msgLen=703
+🔐 Unpacking message...
+❌ Unpack failed: invalid_argument: unable to determine message type
+📦 Raw: {"type":"https://didcomm.org/present-proof/3.0/request-presentation","id":"1766760555906-0ck3zzyy6","from":"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a","to":["did:fake:method:invalid"],"created_time":1766760555906,"body":{"presentation_definition":{"id":"pd-nf-auth-request-a","input_descript
+HTTP error: invalid_argument: unable to determine message type
+🔍 Incoming: packed=true, mode=encrypted, msgLen=696
+🔐 Unpacking message...
+HTTP error: invalid_argument: unable to determine message type
+❌ Unpack failed: invalid_argument: unable to determine message type
+📦 Raw: {"type":"https://didcomm.org/present-proof/3.0/request-presentation","id":"1766760556042-m3zce3hd4","from":"did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a","to":["not-a-did-at-all"],"created_time":1766760556042,"body":{"presentation_definition":{"id":"pd-nf-auth-request-a","input_descriptors":[{
+🔍 Incoming: packed=true, mode=encrypted, msgLen=930
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/request
+📨 request from did-nf-a
+📤 NF call: test/test
+📤 DIDComm: response → did-nf-a
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+✅ Packed successfully, length=997
+🔍 Incoming: packed=true, mode=encrypted, msgLen=947
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/request
+📨 request from did-nf-a
+📤 NF call: test-invalid-vc/verify
+📤 DIDComm: response → did-nf-a
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+✅ Packed successfully, length=1011
+🔍 Incoming: packed=true, mode=encrypted, msgLen=1013
+🔐 Unpacking message...
+✅ Unpacked: type=https://didcomm.org/service/1.0/request
+📨 request from did-nf-a
+📤 NF call: test-visibility/check
+📤 DIDComm: response → did-nf-a
+📦 Packing: mode=authcrypt, from=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b, to=did:web:kiuyenzo.github.io:Prototype:dids:did-nf-a
+✅ Packed successfully, length=1011
+
+--- mTLS Configuration ---
+Cluster-A mTLS Mode: STRICT

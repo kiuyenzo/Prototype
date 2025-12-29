@@ -32,7 +32,7 @@
         {
             "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b#didcomm-1",
             "type": "DIDCommMessaging",
-            "serviceEndpoint": "http://172.23.0.2:31696/didcomm/receive"
+            "serviceEndpoint": "http://veramo-nf-b.nf-b-namespace.svc.cluster.local:3001/didcomm/receive"
         }
     ]
 }

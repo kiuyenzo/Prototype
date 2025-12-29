@@ -1,0 +1,88 @@
+G4: Policy Enforcement Analysis - Fri Dec 26 15:52:36 CET 2025
+=============================================
+
+--- AuthorizationPolicy (Cluster-A) ---
+apiVersion: v1
+items:
+- apiVersion: security.istio.io/v1
+  kind: AuthorizationPolicy
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"security.istio.io/v1beta1","kind":"AuthorizationPolicy","metadata":{"annotations":{},"name":"veramo-didcomm-policy","namespace":"nf-a-namespace"},"spec":{"action":"ALLOW","rules":[{"from":[{"source":{"principals":["cluster.local/ns/nf-a-namespace/sa/default","cluster.local/ns/nf-b-namespace/sa/default","cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]}}],"to":[{"operation":{"methods":["POST","GET"],"paths":["/didcomm/*","/health","/session/*","/nf/*","/credentials","/baseline/*"]}}]}],"selector":{"matchLabels":{"app":"nf-a"}}}}
+    creationTimestamp: "2025-12-20T10:32:10Z"
+    generation: 5
+    name: veramo-didcomm-policy
+    namespace: nf-a-namespace
+    resourceVersion: "329206"
+    uid: 4d7de55b-7a6a-426e-88cb-c1635fb564bd
+  spec:
+    action: ALLOW
+    rules:
+    - from:
+      - source:
+          principals:
+          - cluster.local/ns/nf-a-namespace/sa/default
+          - cluster.local/ns/nf-b-namespace/sa/default
+          - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+      to:
+      - operation:
+          methods:
+          - POST
+          - GET
+          paths:
+          - /didcomm/*
+          - /health
+          - /session/*
+          - /nf/*
+          - /credentials
+          - /baseline/*
+    selector:
+      matchLabels:
+        app: nf-a
+kind: List
+metadata:
+  resourceVersion: ""
+
+--- AuthorizationPolicy (Cluster-B) ---
+apiVersion: v1
+items:
+- apiVersion: security.istio.io/v1
+  kind: AuthorizationPolicy
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"security.istio.io/v1beta1","kind":"AuthorizationPolicy","metadata":{"annotations":{},"name":"veramo-didcomm-policy","namespace":"nf-b-namespace"},"spec":{"action":"ALLOW","rules":[{"from":[{"source":{"principals":["cluster.local/ns/nf-a-namespace/sa/default","cluster.local/ns/nf-b-namespace/sa/default","cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]}}],"to":[{"operation":{"methods":["POST","GET"],"paths":["/didcomm/*","/health","/session/*","/nf/*","/credentials","/baseline/*"]}}]}],"selector":{"matchLabels":{"app":"nf-b"}}}}
+    creationTimestamp: "2025-12-20T10:32:10Z"
+    generation: 5
+    name: veramo-didcomm-policy
+    namespace: nf-b-namespace
+    resourceVersion: "334340"
+    uid: b20743e9-7813-4b0f-9ce0-4292cf595d5d
+  spec:
+    action: ALLOW
+    rules:
+    - from:
+      - source:
+          principals:
+          - cluster.local/ns/nf-a-namespace/sa/default
+          - cluster.local/ns/nf-b-namespace/sa/default
+          - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+      to:
+      - operation:
+          methods:
+          - POST
+          - GET
+          paths:
+          - /didcomm/*
+          - /health
+          - /session/*
+          - /nf/*
+          - /credentials
+          - /baseline/*
+    selector:
+      matchLabels:
+        app: nf-b
+kind: List
+metadata:
+  resourceVersion: ""

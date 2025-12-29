@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 "use strict";
 /**
  * DIDComm VP Wrapper - VP exchange over DIDComm (Veramo_NF_A ↔ Veramo_NF_B)
@@ -17,7 +17,7 @@ class DIDCommVPWrapper {
     }
     /** Phase 1: Initiate VP Auth Request */
     async initiateVPAuthRequest(ourDid, theirDid, presentationDefinition) {
-        console.log(`🚀 Phase 1: VP Auth Request → ${theirDid.split(':').pop()}`);
+        console.log(`[PHASE1] VP Auth Request -> ${theirDid.split(':').pop()}`);
         const context = { ourDid, theirDid, ourPresentationDefinition: presentationDefinition, authenticated: false, messageLog: [] };
         this.contexts.set(theirDid, context);
         const message = (0, didcomm_messages_js_1.createVPAuthRequest)(ourDid, theirDid, presentationDefinition, 'Please provide VP');
@@ -27,7 +27,7 @@ class DIDCommVPWrapper {
     }
     /** Phase 2: Handle VP Auth Request → respond with VP + PD */
     async handleVPAuthRequest(message, ourDid, credentials, ourPresentationDefinition) {
-        console.log(`📨 Phase 2: VP Auth Request from ${message.from?.split(':').pop()}`);
+        console.log(`[PHASE2] VP Auth Request from ${message.from?.split(':').pop()}`);
         if (!message.from) throw new Error('VP Auth Request must have a from field');
         const context = { ourDid, theirDid: message.from, ourPresentationDefinition, theirPresentationDefinition: message.body.presentation_definition, authenticated: false, messageLog: [message] };
         this.contexts.set(message.from, context);
@@ -46,7 +46,7 @@ class DIDCommVPWrapper {
     }
     /** Phase 2: Handle VP with PD → verify → respond with VP */
     async handleVPWithPD(message, credentials, ourDid, ourPresentationDefinition) {
-        console.log(`🔍 Phase 2: Handling VP_WITH_PD from ${message.from?.split(':').pop()}`);
+        console.log(`[PHASE2] Handling VP_WITH_PD from ${message.from?.split(':').pop()}`);
         if (!message.from) throw new Error('VP with PD message must have a from field');
         let context = this.contexts.get(message.from);
         if (!context && ourDid && ourPresentationDefinition) {
@@ -75,7 +75,7 @@ class DIDCommVPWrapper {
     }
     /** Phase 2 final: Handle VP Response → verify → confirm auth */
     async handleVPResponse(message) {
-        console.log(`✅ Phase 2 final: VP Response from ${message.from?.split(':').pop()}`);
+        console.log(`[PHASE2-FINAL] VP Response from ${message.from?.split(':').pop()}`);
         if (!message.from) throw new Error('VP Response must have a from field');
         const context = this.contexts.get(message.from);
         if (!context) throw new Error(`No context found for ${message.from}`);
@@ -91,7 +91,7 @@ class DIDCommVPWrapper {
             const confirmationMessage = (0, didcomm_messages_js_1.createAuthConfirmation)(context.ourDid, message.from, 'OK', sessionToken, 'Authenticated');
             context.messageLog.push(confirmationMessage);
             this.messageQueue.push(confirmationMessage);
-            console.log('🎉 Mutual authentication successful!');
+            console.log('[AUTH] Mutual authentication successful!');
             return confirmationMessage;
         } catch (error) {
             const rejectionMessage = (0, didcomm_messages_js_1.createAuthConfirmation)(context.ourDid, message.from, 'REJECTED', undefined, error.message);
@@ -101,7 +101,7 @@ class DIDCommVPWrapper {
     }
     /** Phase 3: Handle Auth Confirmation */
     async handleAuthConfirmation(message) {
-        console.log(`📬 Phase 3: Auth Confirmation [${message.body.status}]`);
+        console.log(`[PHASE3] Auth Confirmation [${message.body.status}]`);
         if (!message.from) throw new Error('Auth Confirmation must have a from field');
         const context = this.contexts.get(message.from);
         if (!context) throw new Error(`No context found for ${message.from}`);

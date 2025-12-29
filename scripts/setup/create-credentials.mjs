@@ -28,7 +28,7 @@ const createAgent_ = async (c) => {
   };
 };
 
-console.log('🎫 Create NetworkFunctionCredentials\n');
+console.log('Create NetworkFunctionCredentials\n');
 const { agent: issuer, db: issuerDb } = await createAgent_(ISSUER);
 
 for (const [name, nf] of Object.entries(NFS)) {
@@ -36,7 +36,7 @@ for (const [name, nf] of Object.entries(NFS)) {
   const { agent, db } = await createAgent_(nf);
 
   if ((await agent.dataStoreORMGetVerifiableCredentials({ where: [{ column: 'type', value: ['VerifiableCredential,NetworkFunctionCredential'] }] })).length) {
-    console.log('⏭️  VC exists'); await db.destroy(); continue;
+    console.log('VC exists'); await db.destroy(); continue;
   }
 
   const kid = `${ISSUER.did}#key-1`;
@@ -56,9 +56,9 @@ for (const [name, nf] of Object.entries(NFS)) {
     proof: { type: 'JwtProof2020', jwt }
   }});
 
-  console.log(`✅ VC created`);
+  console.log('VC created');
   await db.destroy();
 }
 
 await issuerDb.destroy();
-console.log('\n🎉 Done!\n');
+console.log('\nDone!\n');

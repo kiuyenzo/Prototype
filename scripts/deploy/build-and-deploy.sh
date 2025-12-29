@@ -9,9 +9,7 @@
 
 set -e
 
-echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║       Sidecar Architecture - Build & Deploy (Kind)             ║"
-echo "╚════════════════════════════════════════════════════════════════╝"
+echo "=== Sidecar Architecture - Build & Deploy ==="
 echo ""
 
 # Navigate to project root (from scripts/deploy/)
@@ -19,157 +17,82 @@ cd "$(dirname "$0")/../.."
 
 # Detect packing mode from deployment YAML
 PACKING_MODE=$(grep "DIDCOMM_PACKING_MODE" -A1 deploy/cluster-a/deployment.yaml | grep "value:" | head -1 | sed 's/.*value: *"\([^"]*\)".*/\1/')
-echo "🔐 Detected Mode: $PACKING_MODE"
+echo "Mode: $PACKING_MODE"
 if [ "$PACKING_MODE" = "encrypted" ]; then
-  echo "   V1: E2E encrypted DIDComm, Pod↔Gateway: TCP (PERMISSIVE)"
+  echo "  Encrypted: E2E encrypted DIDComm, Pod-Gateway: TCP (PERMISSIVE)"
 else
-  echo "   V4a: Signed DIDComm, Pod↔Gateway: mTLS (STRICT)"
+  echo "  Signed: Signed DIDComm, Pod-Gateway: mTLS (STRICT)"
 fi
 echo ""
 
-# Step 1: Compile TypeScript (if using .ts files)
-echo "📦 Step 1: Compiling TypeScript..."
+# Step 1: Compile TypeScript
+echo "[1/6] Compiling TypeScript..."
 npx tsc src/veramo-sidecar.ts src/nf-service.ts --esModuleInterop --resolveJsonModule --module commonjs --target ES2020 --outDir src --skipLibCheck 2>/dev/null || true
-echo "✅ TypeScript compiled"
-echo ""
 
 # Step 2: Build Docker images
-echo "🐳 Step 2: Building Docker images..."
-
-echo "   Building veramo-sidecar:sidecar..."
-docker build -f deploy/docker/Dockerfile.veramo-sidecar -t veramo-sidecar:sidecar .
-
-echo "   Building nf-service:sidecar..."
-docker build -f deploy/docker/Dockerfile.nf-service -t nf-service:sidecar .
-
-echo "✅ Docker images built"
-echo ""
+echo "[2/6] Building Docker images..."
+docker build -f deploy/docker/Dockerfile.veramo-sidecar -t veramo-sidecar:sidecar . >/dev/null
+docker build -f deploy/docker/Dockerfile.nf-service -t nf-service:sidecar . >/dev/null
+echo "  Images built: veramo-sidecar:sidecar, nf-service:sidecar"
 
 # Step 3: Load images into kind clusters
-echo "🚀 Step 3: Loading images into kind clusters..."
-kind load docker-image veramo-sidecar:sidecar --name cluster-a
-kind load docker-image nf-service:sidecar --name cluster-a
-kind load docker-image veramo-sidecar:sidecar --name cluster-b
-kind load docker-image nf-service:sidecar --name cluster-b
-echo "✅ Images loaded into kind clusters (cluster-a, cluster-b)"
-echo ""
+echo "[3/6] Loading images into kind clusters..."
+kind load docker-image veramo-sidecar:sidecar --name cluster-a >/dev/null
+kind load docker-image nf-service:sidecar --name cluster-a >/dev/null
+kind load docker-image veramo-sidecar:sidecar --name cluster-b >/dev/null
+kind load docker-image nf-service:sidecar --name cluster-b >/dev/null
 
 # Step 4: Deploy to Cluster-A
-echo "═══════════════════════════════════════════════════════════════════"
-echo "📋 Step 4: Deploying to Cluster-A"
-echo "═══════════════════════════════════════════════════════════════════"
-kubectl config use-context kind-cluster-a
+echo "[4/6] Deploying to Cluster-A..."
+kubectl config use-context kind-cluster-a >/dev/null
+kubectl delete deployment nf-a -n nf-a-namespace --ignore-not-found >/dev/null
+kubectl apply -f deploy/cluster-a/infrastructure.yaml >/dev/null
+kubectl apply -f deploy/cluster-a/deployment.yaml >/dev/null
+kubectl apply -f deploy/cluster-a/gateway.yaml >/dev/null
+kubectl apply -f deploy/cluster-a/security.yaml >/dev/null
 
-echo "   Deleting existing deployment..."
-kubectl delete deployment nf-a -n nf-a-namespace --ignore-not-found
-
-echo "   Applying infrastructure (namespace, stub-service, serviceentry)..."
-kubectl apply -f deploy/cluster-a/infrastructure.yaml
-
-echo "   Applying sidecar deployment..."
-kubectl apply -f deploy/cluster-a/deployment.yaml
-
-echo "   Applying Istio gateway configuration..."
-kubectl apply -f deploy/cluster-a/gateway.yaml
-
-echo "   Applying Zero Trust security policies..."
-kubectl apply -f deploy/cluster-a/security.yaml
-
-echo "   Applying Istio mTLS configuration ($PACKING_MODE mode)..."
 if [ "$PACKING_MODE" = "encrypted" ]; then
-  kubectl apply -f deploy/mtls-config/mtls-v1.yaml --context kind-cluster-a 2>/dev/null || true
+  kubectl apply -f deploy/mtls-config/mtls-encrypted.yaml --context kind-cluster-a 2>/dev/null || true
 else
-  kubectl apply -f deploy/mtls-config/mtls-v4a.yaml --context kind-cluster-a 2>/dev/null || true
+  kubectl apply -f deploy/mtls-config/mtls-signed.yaml --context kind-cluster-a 2>/dev/null || true
 fi
 
-echo "   Waiting for pod to be ready..."
-kubectl wait --for=condition=ready pod -l app=nf-a -n nf-a-namespace --timeout=120s || true
-
-echo "   Creating credentials..."
+kubectl wait --for=condition=ready pod -l app=nf-a -n nf-a-namespace --timeout=120s 2>/dev/null || true
 NF_A_POD=$(kubectl get pods -n nf-a-namespace -l app=nf-a -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-if [ -n "$NF_A_POD" ]; then
-  kubectl exec -n nf-a-namespace $NF_A_POD -c veramo-sidecar -- node /app/scripts/setup/create-credentials.mjs 2>/dev/null || echo "   Credential creation may need retry"
-fi
-
-echo "✅ Cluster-A deployed"
-echo ""
+[ -n "$NF_A_POD" ] && kubectl exec -n nf-a-namespace $NF_A_POD -c veramo-sidecar -- node /app/scripts/setup/create-credentials.mjs 2>/dev/null || true
 
 # Step 5: Deploy to Cluster-B
-echo "═══════════════════════════════════════════════════════════════════"
-echo "📋 Step 5: Deploying to Cluster-B"
-echo "═══════════════════════════════════════════════════════════════════"
-kubectl config use-context kind-cluster-b
+echo "[5/6] Deploying to Cluster-B..."
+kubectl config use-context kind-cluster-b >/dev/null
+kubectl delete deployment nf-b -n nf-b-namespace --ignore-not-found >/dev/null
+kubectl apply -f deploy/cluster-b/infrastructure.yaml >/dev/null
+kubectl apply -f deploy/cluster-b/deployment.yaml >/dev/null
+kubectl apply -f deploy/cluster-b/gateway.yaml >/dev/null
+kubectl apply -f deploy/cluster-b/security.yaml >/dev/null
 
-echo "   Deleting existing deployment..."
-kubectl delete deployment nf-b -n nf-b-namespace --ignore-not-found
-
-echo "   Applying infrastructure (namespace, stub-service, serviceentry)..."
-kubectl apply -f deploy/cluster-b/infrastructure.yaml
-
-echo "   Applying sidecar deployment..."
-kubectl apply -f deploy/cluster-b/deployment.yaml
-
-echo "   Applying Istio gateway configuration..."
-kubectl apply -f deploy/cluster-b/gateway.yaml
-
-echo "   Applying Zero Trust security policies..."
-kubectl apply -f deploy/cluster-b/security.yaml
-
-echo "   Applying Istio mTLS configuration ($PACKING_MODE mode)..."
 if [ "$PACKING_MODE" = "encrypted" ]; then
-  kubectl apply -f deploy/mtls-config/mtls-v1.yaml --context kind-cluster-b 2>/dev/null || true
+  kubectl apply -f deploy/mtls-config/mtls-encrypted.yaml --context kind-cluster-b 2>/dev/null || true
 else
-  kubectl apply -f deploy/mtls-config/mtls-v4a.yaml --context kind-cluster-b 2>/dev/null || true
+  kubectl apply -f deploy/mtls-config/mtls-signed.yaml --context kind-cluster-b 2>/dev/null || true
 fi
 
-echo "   Waiting for pod to be ready..."
-kubectl wait --for=condition=ready pod -l app=nf-b -n nf-b-namespace --timeout=120s || true
-
-echo "   Creating credentials..."
+kubectl wait --for=condition=ready pod -l app=nf-b -n nf-b-namespace --timeout=120s 2>/dev/null || true
 NF_B_POD=$(kubectl get pods -n nf-b-namespace -l app=nf-b -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-if [ -n "$NF_B_POD" ]; then
-  kubectl exec -n nf-b-namespace $NF_B_POD -c veramo-sidecar -- node /app/scripts/setup/create-credentials.mjs 2>/dev/null || echo "   Credential creation may need retry"
-fi
+[ -n "$NF_B_POD" ] && kubectl exec -n nf-b-namespace $NF_B_POD -c veramo-sidecar -- node /app/scripts/setup/create-credentials.mjs 2>/dev/null || true
 
-echo "✅ Cluster-B deployed"
+# Step 6: Show status
+echo "[6/6] Pod Status"
 echo ""
-
-# Step 6: Show pod status
-echo "═══════════════════════════════════════════════════════════════════"
-echo "📊 Step 6: Pod Status"
-echo "═══════════════════════════════════════════════════════════════════"
-echo ""
-
-echo "Cluster-A (NF-A):"
-kubectl config use-context kind-cluster-a
+echo "Cluster-A:"
+kubectl config use-context kind-cluster-a >/dev/null
 kubectl get pods -n nf-a-namespace -o wide
 echo ""
-
-echo "Cluster-B (NF-B):"
-kubectl config use-context kind-cluster-b
+echo "Cluster-B:"
+kubectl config use-context kind-cluster-b >/dev/null
 kubectl get pods -n nf-b-namespace -o wide
 echo ""
 
-echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║                    Deployment Complete!                        ║"
-echo "╚════════════════════════════════════════════════════════════════╝"
+echo "=== Deployment Complete ==="
+echo "Mode: $PACKING_MODE"
 echo ""
-echo "Architecture per Pod:"
-echo "  Container 1: nf-service (Port 3000) - Business Logic"
-echo "  Container 2: veramo-sidecar (Port 3001) - DIDComm/VP Handler"
-echo "  Container 3: istio-proxy (auto) - mTLS/Envoy"
-echo ""
-echo "Security Mode: $PACKING_MODE"
-if [ "$PACKING_MODE" = "encrypted" ]; then
-  echo "  V1: DIDComm = E2E encrypted (authcrypt/JWE)"
-  echo "      Pod ↔ Gateway: TCP (PERMISSIVE)"
-  echo "      Gateway ↔ Gateway: mTLS"
-else
-  echo "  V4a: DIDComm = Signed only (jws)"
-  echo "       Pod ↔ Gateway: mTLS (STRICT)"
-  echo "       Gateway ↔ Gateway: mTLS"
-fi
-echo ""
-echo "To test the flow, run:"
-echo "  ./tests/test-happy-path.sh"
-echo ""
+echo "Test: ./tests/test-functional-correctness.sh"

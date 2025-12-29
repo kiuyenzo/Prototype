@@ -41,4 +41,4 @@ spec:
     to:
     - operation:
         methods: ["POST", "GET"]
-        paths: ["/didcomm/*", "/health", "/session/*"]
+        paths: ["/didcomm/*", "/health", "/session/*", "/nf/*", "/credentials", "/baseline/*"]

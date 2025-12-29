@@ -1,0 +1,81 @@
+# =============================================================================
+# Baseline B: mTLS only (no DIDComm, no VP exchange)
+# =============================================================================
+# [NF-A:3000] ←mTLS→ [Gateway-A] ←mTLS→ [Gateway-B] ←mTLS→ [NF-B:3000]
+#
+# - Cluster-internal: mTLS (STRICT)
+# - Between Gateways: mTLS
+# - No DIDComm, no VPs - pure mTLS baseline for performance comparison
+#
+# Apply:
+#   kubectl apply -f deploy/mtls-config/mtls-baseline.yaml --context kind-cluster-a
+#   kubectl apply -f deploy/mtls-config/mtls-baseline.yaml --context kind-cluster-b
+#
+# Test-Endpoint: /baseline/request (bypasses Veramo sidecar)
+# =============================================================================
+
+---
+# Enforce mTLS inside Cluster-A
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-a-namespace
+spec:
+  mtls:
+    mode: STRICT  # Baseline B: mTLS everywhere
+
+---
+# Enforce mTLS inside Cluster-B
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-b-namespace
+spec:
+  mtls:
+    mode: STRICT  # Baseline B: mTLS everywhere
+
+---
+# Cluster-A: Route /baseline/* directly to NF service (port 3000, bypass Veramo)
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: baseline-nf-a-vs
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - nf-a-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /baseline/
+    route:
+    - destination:
+        host: nf-a-service.nf-a-namespace.svc.cluster.local
+        port:
+          number: 3000  # Direct to NF, not Veramo sidecar
+
+---
+# Cluster-B: Route /baseline/* directly to NF service (port 3000, bypass Veramo)
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: baseline-nf-b-vs
+  namespace: nf-b-namespace
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - nf-b-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /baseline/
+    route:
+    - destination:
+        host: nf-b-service.nf-b-namespace.svc.cluster.local
+        port:
+          number: 3000  # Direct to NF, not Veramo sidecar

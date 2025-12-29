@@ -18,14 +18,14 @@ for entry in "${DBS[@]}"; do
     OWN_DID="${entry#*:}"
 
     if [ -f "$DB_PATH" ]; then
-        echo "🧹 Resetting: $(basename "$DB_PATH")"
+        echo "Resetting: $(basename "$DB_PATH")"
         sqlite3 "$DB_PATH" "DELETE FROM presentation;" 2>/dev/null
         sqlite3 "$DB_PATH" "DELETE FROM message;" 2>/dev/null
         sqlite3 "$DB_PATH" "DELETE FROM credential WHERE json_extract(raw, '\$.credentialSubject.id') != '$OWN_DID';" 2>/dev/null
-        echo "   ✅ Done"
+        echo "  Done"
     else
-        echo "ℹ️ Not found: $DB_PATH"
+        echo "Not found: $DB_PATH"
     fi
 done
 
-echo "✅ All databases reset"
+echo "All databases reset"
