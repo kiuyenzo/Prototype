@@ -1,0 +1,18 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-issuer",
+  "verificationMethod": [
+    {
+      "id": "did:web:kiuyenzo.github.io:Prototype:dids:did-issuer#key-1",
+      "type": "EcdsaSecp256k1VerificationKey2019",
+      "controller": "did:web:kiuyenzo.github.io:Prototype:dids:did-issuer",
+      "publicKeyHex": "0483e3cde7db23f65c4e21008efc00d7db387e3f5085cb458fd872e636780b3bd2226a3be023fb05412e7c7ef2a545a8fb9a8713549495090f59e4a4f9b4ff8800"
+    }
+  ],
+  "assertionMethod": [
+    "did:web:kiuyenzo.github.io:Prototype:dids:did-issuer#key-1"
+  ]
+}

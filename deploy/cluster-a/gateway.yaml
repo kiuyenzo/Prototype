@@ -1,0 +1,174 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: nf-a-gateway
+  namespace: nf-a-namespace
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http-didcomm
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
+      number: 443
+      name: https-didcomm
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      caCertificates: /etc/istio/ca-certs/ca.crt
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: veramo-nf-a-vs
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - veramo-nf-a.nf-a-namespace.svc.cluster.local
+  - veramo-nf-b.nf-b-namespace.svc.cluster.local
+  gateways:
+  - nf-a-gateway
+  http:
+  - match:
+    - headers:
+        host:
+          exact: veramo-nf-a.nf-a-namespace.svc.cluster.local
+    route:
+    - destination:
+        host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+        port:
+          number: 3001  
+  - match:
+    - headers:
+        host:
+          exact: veramo-nf-b.nf-b-namespace.svc.cluster.local
+    route:
+    - destination:
+        host: cluster-b.external
+        port:
+          number: 30392
+  - match:
+    - uri:
+        prefix: /didcomm
+    - uri:
+        prefix: /health
+    route:
+    - destination:
+        host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+        port:
+          number: 3001 
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: veramo-nf-a-mesh-vs
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - veramo-nf-a.nf-a-namespace.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - match:
+    - uri:
+        prefix: /didcomm
+    - uri:
+        prefix: /health
+    - uri:
+        prefix: /nf
+    route:
+    - destination:
+        host: veramo-nf-a.nf-a-namespace.svc.cluster.local
+        port:
+          number: 3001  
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: cluster-b-gateway
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - cluster-b.external
+  addresses:
+  - 172.23.0.2
+  ports:
+  - number: 31696
+    name: http-didcomm
+    protocol: HTTP
+  - number: 30392
+    name: https-didcomm
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+  - address: 172.23.0.3
+    ports:
+      http-didcomm: 31696
+      https-didcomm: 32524
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cluster-b-mtls
+  namespace: nf-a-namespace
+spec:
+  host: cluster-b.external
+  trafficPolicy:
+    tls:
+      mode: MUTUAL
+      credentialName: cluster-b-client-certs
+      sni: cluster-b.external
+    connectionPool:
+      http:
+        h2UpgradePolicy: UPGRADE
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 10
+    loadBalancer:
+      simple: ROUND_ROBIN
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: local-gateway-egress
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - egress.cluster-a.local
+  location: MESH_INTERNAL
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
+  resolution: DNS
+  endpoints:
+  - address: istio-ingressgateway.istio-system.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cluster-b-via-local-gateway
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - egress.cluster-a.local
+  http:
+  - match:
+    - headers:
+        x-destination-cluster:
+          exact: cluster-b
+    rewrite:
+      authority: cluster-b.external
+    route:
+    - destination:
+        host: cluster-b.external
+        port:
+          number: 30392

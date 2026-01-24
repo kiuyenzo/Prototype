@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nf-a-namespace
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nf-b-namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veramo-nf-b
+  namespace: nf-b-namespace
+spec:
+  clusterIP: None  
+  ports:
+  - port: 3001
+    name: http-veramo
+    targetPort: 3001
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: veramo-nf-b
+  namespace: nf-b-namespace
+subsets:
+- addresses:
+  - ip: 172.23.0.2 
+  ports:
+  - port: 31696   
+    name: http-veramo
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: veramo-nf-b-external
+  namespace: nf-a-namespace
+spec:
+  hosts:
+  - veramo-nf-b.nf-b-namespace.svc.cluster.local
+  addresses:
+  - 240.0.0.3 
+  ports:
+  - number: 3001
+    name: http-veramo
+    protocol: HTTP
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+  - address: 172.23.0.2  
+    ports:
+      http-veramo: 31696  
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: veramo-nf-b-mtls
+  namespace: nf-a-namespace
+spec:
+  host: veramo-nf-b.nf-b-namespace.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: MUTUAL
+      credentialName: cluster-b-client-certs
+      sni: cluster-b.external
+    connectionPool:
+      http:
+        h2UpgradePolicy: UPGRADE

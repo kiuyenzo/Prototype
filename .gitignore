@@ -1,0 +1,10 @@
+node_modules/
+package-lock.json
+.DS_Store
+.venv/
+.vscode/
+.idea/
+certs/
+tests/results/
+__pycache__/
+*.pyc

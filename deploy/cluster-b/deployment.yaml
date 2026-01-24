@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-b
+  namespace: nf-b-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nf-b
+  template:
+    metadata:
+      labels:
+        app: nf-b
+    spec:
+      containers:
+        - name: nf-service
+          image: nf-service:sidecar
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+              name: nf-http
+          env:
+            - name: NF_PORT
+              value: "3000"
+            - name: VERAMO_PORT
+              value: "3001"
+            - name: NF_NAME
+              value: "NF-B"
+            - name: MY_DID
+              value: "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+        - name: veramo-sidecar
+          image: veramo-sidecar:sidecar
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3001
+              name: veramo-http
+          env:
+            - name: USE_KUBERNETES
+              value: "true"
+            - name: VERAMO_PORT
+              value: "3001"
+            - name: NF_PORT
+              value: "3000"
+            - name: MY_DID
+              value: "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
+            - name: OWN_DID
+              value: "did:web:kiuyenzo.github.io:Prototype:dids:did-nf-b"
+            - name: DB_PATH
+              value: "/app/data/db-nf-b/database-nf-b.sqlite"
+            - name: DB_ENCRYPTION_KEY
+              value: "3859413b662c8fc7e632cda1fe9d5f07991c0b5d2bd2d8a69fa36e9e25cfef1d"
+            - name: DIDCOMM_PACKING_MODE
+              value: "encrypted"
+            - name: CLUSTER_A_IP
+              value: "172.23.0.2"
+            - name: CLUSTER_B_IP
+              value: "172.23.0.3"
+            - name: CLUSTER_A_PORT
+              value: "30265"
+            - name: CLUSTER_B_PORT
+              value: "30574"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veramo-nf-b
+  namespace: nf-b-namespace
+spec:
+  selector:
+    app: nf-b
+  ports:
+    - port: 3001
+      targetPort: 3001
+      name: veramo-http
+    - port: 3000
+      targetPort: 3000
+      name: nf-http

@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-a-namespace
+spec:
+  mtls:
+    mode: STRICT 
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-b-namespace
+spec:
+  mtls:
+    mode: STRICT 

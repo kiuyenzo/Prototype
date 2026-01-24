@@ -1,0 +1,41 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-mtls
+  namespace: nf-b-namespace
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: veramo-nf-b-mtls
+  namespace: nf-b-namespace
+spec:
+  host: veramo-nf-b.nf-b-namespace.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: veramo-didcomm-policy
+  namespace: nf-b-namespace
+spec:
+  selector:
+    matchLabels:
+      app: nf-b
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals:
+        - "cluster.local/ns/nf-a-namespace/sa/default"
+        - "cluster.local/ns/nf-b-namespace/sa/default"
+        - "cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+    to:
+    - operation:
+        methods: ["POST", "GET"]
+        paths: ["/didcomm/*", "/health", "/session/*", "/nf/*", "/credentials", "/baseline/*"]

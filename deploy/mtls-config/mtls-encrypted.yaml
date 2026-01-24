@@ -1,0 +1,39 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-a-namespace
+spec:
+  mtls:
+    mode: PERMISSIVE
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: internal-tcp-mode
+  namespace: nf-a-namespace
+spec:
+  host: "*.nf-a-namespace.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE 
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: didcomm-mtls-mode
+  namespace: nf-b-namespace
+spec:
+  mtls:
+    mode: PERMISSIVE 
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: internal-tcp-mode
+  namespace: nf-b-namespace
+spec:
+  host: "*.nf-b-namespace.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE  

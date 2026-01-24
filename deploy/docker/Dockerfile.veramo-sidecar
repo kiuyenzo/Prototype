@@ -1,0 +1,38 @@
+FROM node:20-alpine
+
+RUN apk update && apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    sqlite \
+    sqlite-dev \
+    wget \
+    curl
+
+WORKDIR /app
+
+COPY node_modules/ ./node_modules/
+
+RUN npm rebuild sqlite3 better-sqlite3 2>/dev/null || npm install sqlite3 better-sqlite3
+
+COPY src/ ./src/
+
+COPY scripts/ ./scripts/
+
+COPY data/ ./data/
+
+COPY dids/ ./dids/
+
+COPY deploy/docker/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+ENV VERAMO_PORT=3001
+ENV NF_PORT=3000
+ENV USE_KUBERNETES=true
+
+EXPOSE 3001
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
+
+ENTRYPOINT ["./entrypoint.sh"]
